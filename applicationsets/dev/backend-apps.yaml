@@ -49,7 +49,7 @@ spec:
         - app: compass-multicloud-migration
         - app: service-registry
         - app: orbiter-compute-console-service
-        #- app: fluid-monitoring-service
+        - app: fluid-monitoring-service
         - app: dbaas-k8s
         - app: f5-orchestrator
         - app: orbiter-compute-service

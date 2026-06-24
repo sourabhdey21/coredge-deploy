@@ -64,7 +64,7 @@ spec:
         - repoURL: https://github.com/sourabhdey21/coredge-deploy.git
           targetRevision: main
           ref: values
-        - repoURL: https://github.com/coredgeio/coredge-monitoring.git
+        - repoURL: https://github.com/sourabhdey21/coredge-monitoring.git
           targetRevision: main
           path: helm/{{app}}
           helm:
