@@ -1,0 +1,271 @@
+# keycloak-ha - airtel dev
+# copied from ccs-helm-charts
+
+## Global Container image registry
+## Global Container image repository
+## Global Container image Pull Policy
+## Global Container image Pull Secrets
+## Global Storage Class for persistent volumes
+global:
+  registry: &registry docker.io
+  repository: &repository coredgeio
+  imagePullPolicy: &imagePolicy Always
+  imagePullSecrets: []
+  storageClass: &storageClass ""
+
+## Keycloak replica count.
+## Minimum is set to 3 to provide HA capabilities
+replicaCount: 3
+
+## Keycloak Image and Tag
+image:
+  name: keycloak
+  tag: ""
+
+## Full Name Override for all resources in the helm chart
+# fullnameOverride: ""
+
+## Keycloak authentication parameters. Password change recommended
+## If using external postgresql, make sure admin user and password are consistent
+auth:
+  adminUser: "admin"
+  adminPass: "admin"
+
+## Keycloak service overrides
+## Default is set to ClusterIP
+service:
+  type: NodePort
+  nodePorts:
+    http: "32703"
+    https: "32704"
+
+## Set Keycloak Themes
+themeOverride:
+  enabled: false
+  default: ""
+  welcome: ""
+  admin: ""
+
+## Set container requests and limits for different resources like CPU or memory (essential for production workloads)
+## Guaranteed QoS: requests == limits so JVM is never CFS-throttled under burst.
+## 6 CPU: sufficient for 1000+ realms at steady state (reduced from 8 to fit 3 pods on 5 infra nodes
+## alongside 3 PG pods at 15 CPU each — two KC pods share one node at 6+6=12 CPU).
+## 16Gi RAM: gives JVM 12g heap for Infinispan — entire KC dataset fits in cache.
+resources:
+  requests:
+    cpu: "6"
+    memory: "16Gi"
+  limits:
+    cpu: "6"
+    memory: "16Gi"
+
+## Name of the secret containing the Keycloak custom CA certificates. The secret will be mounted as a directory and configured using KC_TRUSTSTORE_PATHS.
+## https://www.keycloak.org/server/keycloak-truststore
+## Could be created like this: kubectl create secret generic secretName --from-file=./certificateToMerge.pem
+customCaExistingSecret: ""
+
+## HTTPS settings
+tls:
+  ### Enable TLS encryption. Required to enable HTTPs traffic.
+  enabled: true
+  ### Uses generated self signed tls certs in PEM format.
+  selfSigned: true
+  ### Existing secret containing the TLS certificates per Keycloak replica
+  ### If using PEM, make sure the PEM key and cert are named 'tls.key' and 'tls.crt' respectively.
+  ### Make sure tls.selfSigned == false
+  tlsSecretName: ""
+
+## Run Keycloak in production mode.
+## TLS configuration is required except when using proxy=edge.
+production: true
+
+## KC_PROXY_HEADERS replaces KC_PROXY (removed in KC 25)
+proxyHeaders: "xforwarded"
+
+# hostname: "auth-dev.coredge.internal"
+
+## Set the path relative to '/' for serving resources.
+## Useful if you are migrating from older version which were using '/auth/'
+httpRelativePath: "/auth/"
+
+## JVM heap: 12g max (~75% of 16Gi container). Xms=8g pre-allocates heap at startup.
+## At 12g, Infinispan holds the full KC dataset in memory (500 realms × clients × roles × keys).
+## After the first cold-start pass, the distributed cache means subsequent pod restarts
+## recover from surviving pods without triggering a full DB reload.
+## UseContainerSupport makes the JVM honour cgroup limits rather than node totals.
+jvmHeap: "-Xms8g -Xmx12g -XX:MaxGCPauseMillis=200 -XX:+UseContainerSupport"
+
+## Liveness probe — less aggressive than chart default (periodSeconds: 1)
+livenessProbe:
+  failureThreshold: 6
+  initialDelaySeconds: 300
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+## Readiness probe — routes to /health/ready on management port (9000) instead of
+## /auth/realms/master on port 8080. The management endpoint does NOT hit the DB or
+## Infinispan cache, so it cannot false-positive 503 when KC is busy serving real
+## traffic. The old endpoint was the trigger for the death spiral:
+##   probe 503s → K8s evicts pod → remaining pods overload → they 503 → cascade.
+readinessProbe:
+  failureThreshold: 6
+  initialDelaySeconds: 60   # was 30 — extra time for DB pool warm-up and JVM JIT
+  periodSeconds: 10
+  timeoutSeconds: 5
+  path: "/health/ready"
+  port: "management"
+  ## KC 26 serves port 9000 (management) over HTTPS when TLS is configured.
+  ## K8s kubelet skips cert verification for HTTPS probes — self-signed cert is fine.
+  scheme: "HTTPS"
+
+## Extra Keycloak Configuration overrides
+extraConfiguration:
+  database:
+    poolSize:
+      ## 50 pre-warmed connections per pod (150 cluster-wide idle).
+      ## Cold-start root cause: with 500 minimum, 500 threads hit expandCompositeRoles
+      ## simultaneously. KC's computeSerialized is per-key — only 1 thread loads each role
+      ## from DB, the other 499 wait idle-in-transaction. Thread-1 does 12240 queries × 5ms
+      ## = 61s of SQL; 499 waiting threads accumulate 61s idle-in-transaction → PG kills
+      ## all 499 connections at idleInTransactionSessionTimeout → Connection is closed cascade.
+      ## With 50 minimum: 50 threads each load DIFFERENT roles in parallel (no lock contention),
+      ## cold start completes in 12240/50 × 5ms ≈ 1.2s. At 1500 realms: 40800/50 × 5ms ≈ 4s.
+      ## Pool grows to 600 on demand for sustained load.
+      initial: "50"
+      minimum: "50"
+      maximum: "600"
+    ## 30s acquisition timeout: safety net for cold-cache burst. With 500 pre-warmed
+    ## connections the pool rarely needs to create new ones during startup stampede.
+    acquisitionTimeout: "30s"
+    leakDetectionInterval: "30s"
+  transaction:
+    ## 300s: expandCompositeRoles on cold Infinispan start does ~14280 sequential DB queries
+    ## at 680 realms (~170s at 12ms/query). Must be > 170s with headroom. At 1500 realms
+    ## (~31500 composites) this will need to be revisited — see management-client cleanup plan.
+    defaultTimeout: "300"
+  threadPool:
+    ## 500 threads + 500 queue = 1000 requests in-flight per pod before rejection.
+    ## At 10K RPS / 15 pods / 50ms avg latency = ~33 concurrent per pod — well within limits.
+    maxThreads: "500"
+    queueSize: "500"
+  http:
+    ## Raised to accept more simultaneous inbound connections at peak 10K RPS.
+    maxConnections: "1000"
+    maxConcurrentStreams: "500"
+  vertx:
+    ## Admin API calls are blocking I/O in Quarkus/Vert.x. Doubled again to reduce
+    ## queuing when many Admin API requests arrive simultaneously at 10K RPS.
+    workerPoolSize: "400"
+  ## Disable KC 26.x Fine-Grained Admin Permissions V2 (FGAP v2).
+  ## FGAP v2 runs expandCompositeRoles on every admin API call, doing N×DB queries
+  ## per role even on fast 404s. With ~20 concurrent realm creations this causes
+  ## JTA transaction timeouts and KC readiness probe failures. Safe to disable
+  ## because this system uses OpenFGA for authorization, not KC's internal FGAP.
+  featuresDisabled: "admin-fine-grained-authz"
+  cache:
+    ## Right-sized to actual cluster data (762 realms, ~1k users, ~7k clients today).
+    ## usersMaxCount doubled to 20000 — more in-flight sessions stay cached, reducing DB reads under 10K RPS.
+    ## rolesMaxCount: 1500 realms × ~10 clients × ~20 roles ≈ 300k total cluster entries.
+    ## With 3-pod distributed cache (1 owner/entry), each pod holds ~100k entries.
+    ## 400000/pod gives 4× headroom for client-scoped and composite roles.
+    realmsMaxCount: "5000"
+    usersMaxCount: "40000"
+    authorizationMaxCount: "20000"
+    keysMaxCount: "20000"
+    rolesMaxCount: "400000"
+
+## Keycloak ingress parameters. (User facing)
+ingress:
+  enabled: true
+  className: "nginx"
+  extraAnnotations: {}
+  hostname: "auth-dev.coredge.internal"
+  tlsSecret: "coredge-tls"
+
+## Keycloak admin ingress parameters
+adminIngress:
+  enabled: "true"
+  className: "nginx"
+  extraAnnotations: {}
+  hostname: "auth-dev.coredge.internal"
+  tlsSecret: "coredge-tls"
+
+## Keycloak logging configuration.
+## Alternates between the default log output format or json format
+## Available options : FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL, OFF. Default is INFO
+logging:
+  output: default
+  level: INFO
+
+## Keycloak HPA autoscaling configuration
+## Requires a metrics server pre-installed
+## Scale out before CPU saturates (60% target). Pods spread across nodes via
+## podAntiAffinity so each new replica adds real capacity, not contention.
+autoscaling:
+  enabled: false
+  minReplicas: 5
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 75
+
+# Additional volumes for keycloak
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts for keycloak
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+## Override Command
+command: []
+
+nodeSelector: {}
+
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+
+## Enable affinity for Keycloak Pods/Members
+affinity: {}
+
+## Use external Postgresql configuration.
+## Above Postgresql cluster configuration will be ignored
+externalPostgresql:
+  host: ""
+  port: ""
+  user: ""
+  database: ""
+  password: ""
+
+## Postgresql Operator configuration
+## This operator will manage the lifecycle of the above postgresql cluster
+postgres-operator:
+  enabled: false
+
+## Postgresql HA cluster Configuration
+## Routes KC JDBC through the Zalando PgBouncer pooler service (session mode).
+## Session mode: each KC JDBC connection holds a dedicated PG backend for its lifetime.
+## Required because KC/Hibernate keeps transactions open across statements; transaction
+## mode caused idle-in-transaction PG connections holding REALM row locks → 25s reads.
+## Also set pgcluster.connectionPooler.enabled=true in the postgres chart values.
+pgcluster:
+  name: "keycloak"
+  connectionPooler:
+    enabled: true
+
+## Prometheus monitoring — deploys a ServiceMonitor
+## KC 26.x auto-selects port management (9000) at /metrics
+monitoring:
+  enabled: true
+  interval: "30s"
+  scrapeTimeout: "10s"
+  path: "/metrics"
+  ## Add labels to match your Prometheus operator's serviceMonitorSelector
+  labels: {}

@@ -1,0 +1,19 @@
+schedule: "0 */6 * * *"
+
+pvc:
+  name: keycloak-postgres-backup-pvc
+  storage: 50Gi
+
+postgres:
+  database: keycloak
+  host: keycloak-postgresql-cluster
+  port: "5432"
+
+s3:
+  enabled: false
+  secretName: s3-credentials
+  retainCount: 15
+
+images:
+  postgres: postgres:15.7
+  s5cmd: peakcom/s5cmd

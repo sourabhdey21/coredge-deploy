@@ -1,0 +1,131 @@
+# mongodb - airtel qa
+# copied from ccs-helm-charts
+
+global:
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+mongodb:
+  percona:
+    enabled: true
+
+  operator:
+    enabled: true
+
+  configdb:
+    enabled: true
+    usersSecretName: configdb-secrets
+    # replicaCount: 3
+
+  metricsdb:
+    enabled: true
+    usersSecretName: metricsdb-secrets
+    # replicaCount: 3
+
+  systemUsers:
+    backup:        { user: "backup",        password: "CHANGE_ME" }
+    clusterAdmin:  { user: "clusterAdmin",  password: "CHANGE_ME" }
+    clusterMonitor: { user: "clusterMonitor", password: "CHANGE_ME" }
+    databaseAdmin: { user: "sigma", password: "pass" }
+    userAdmin:     { user: "read",     password: "pass" }
+      
+
+# Subchart values (aliases!)
+
+compassdbNodePorts:
+  configdb:
+    nodePort: 30377
+  metricsdb:
+    nodePort: 30378
+
+
+configdb:
+  fullnameOverride: compass-configdb
+  image:
+    repository: percona/percona-server-mongodb
+    tag: "5.0.3-2"
+
+  secrets:
+    users: configdb-secrets
+
+  tls:
+    mode: disabled
+
+  unsafeFlags:
+    tls: true
+    replsetSize: true
+
+  sharding:
+    enabled: false
+
+  replsets:
+    rs0:
+      name: rs0
+      size: 3
+      affinity:
+        antiAffinityTopologyKey: "none"      
+      readinessProbe:
+        timeoutSeconds: 10
+        failureThreshold: 20
+      volumeSpec:
+        persistentVolumeClaim:
+          resources:
+            requests:
+              storage: 4Gi
+      resources:
+        requests:
+          cpu: "1000m"
+          memory: "2Gi"     
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+metricsdb:
+  fullnameOverride: compass-metricsdb  
+  image:
+    repository: percona/percona-server-mongodb
+    tag: "5.0.3-2"
+
+  sharding:
+    enabled: false
+
+  secrets:
+    users: metricsdb-secrets
+
+  tls:
+    mode: disabled
+
+  unsafeFlags:
+    tls: true
+    replsetSize: true
+
+  replsets:
+    rs0:
+      name: rs0
+      size: 3
+      affinity:
+        antiAffinityTopologyKey: "none"
+      readinessProbe:
+        timeoutSeconds: 10
+        failureThreshold: 20
+      volumeSpec:
+        persistentVolumeClaim:
+          resources:
+            requests:
+              storage: 4Gi
+      resources:
+        requests:
+          cpu: "1000m"
+          memory: "4Gi"
+        limits:
+          cpu: "2"
+          memory: "8Gi"

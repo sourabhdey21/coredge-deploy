@@ -1,0 +1,26 @@
+# mongo-express - airtel dev
+# copied from ccs-helm-charts
+
+mongoExpress:
+  enabled: false # set to true to enable mongo-express deployments for each database
+  image:
+    repository: mongo-express
+    tag: 1.0.2-18
+    pullPolicy: IfNotPresent
+  auth:
+    enabled: true
+    username: admin
+    password: changeme
+
+nginx:
+  image: nginx:1.29.3
+
+config:
+  port: 31000 # port onto which mongo express will be hosted
+  databases:
+    - name: "compass-config" # any name you deem appropriate
+      port: 3210 # internal kubernetes port, ensure uniqueness
+      dbHost: "configdb" # mongo db host name
+    - name: "compass-metrics"
+      port: 3211
+      dbHost: "metricsdb"

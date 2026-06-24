@@ -1,0 +1,90 @@
+# vmconsole - core42 dev
+# copied from ccs-helm-charts
+
+global:
+  imageRegistry: ""
+  repository: &repository coredgeio
+  releaseTag: &releaseTag ""
+  imagePullPolicy: &imagePolicy Always
+  imagePullSecrets: []
+
+
+  # indicates enabling use of DNS hostnames via Ingress
+  # switch to indicate use of domain configuration
+  dnsEnabled: &dnsEnabled true
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # Type to expose UI services with
+  # Supported: ingress / loadbalancer
+  serviceExposure:
+    type: "nodeport"
+
+  # Ingress claas to be defined to inngress configuration when using Ingress controller
+  # Only used when supports Nginx Ingress Controller
+  # Only used when global.serviceExposure.type==ingress
+  ingressClass: &ingressClass "nginx"
+  
+  ## Configuration for exposing frontend URLs
+  ## DNS hostnames considered only when global.dnsEnabled is 'true'
+  ## Othwerwise NodePorts considered
+  frontend:
+    vmconsole:
+      domain: &vmconsoleDomain "vm-console-dev.coredge.internal"
+      tlsSecret: &vmconsoleTls "coredge-tls"
+      nodePort: &vmconsoleNodePort "32700"
+
+## Openstack version (mandatory)
+## If >= 18, websockify proxy routes are not generated
+openstackVersion: 17
+      
+## Openstack Cloud Provider Details (Support Multi AZ)
+cloudProviders:
+   - name: "nova"
+     protocol: 'https'
+     host: "10.10.20.100" 
+     port: "6080"
+  # - name: "az2"
+  #   protocol: 'https'
+  #   host: "" 
+  #   port: ""
+  #   sniProxy: true
+  # - name: "az1"
+  #   protocol: 'https'
+  #   host: "" 
+  #   port: ""
+  #   sniProxy: true
+  # - name: "az3"
+  #   protocol: 'https'
+  #   host: "" 
+  #   port: ""
+  #   sniProxy: true
+
+replicaCount: "1"
+
+image: nginx:latest
+
+service:
+  nodePort: "32700"
+
+resources: 
+  limits:
+    cpu: 400m
+    # memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 50Mi
+
+nodeSelector: {}
+
+ingress:
+  tlsSecret: "coredge-tls"
+  hostname: "vm-console-dev.coredge.internal"
+
+orbiterComputeConsole:
+  enabled: true

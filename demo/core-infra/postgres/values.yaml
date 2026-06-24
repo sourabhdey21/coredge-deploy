@@ -1,0 +1,192 @@
+# postgres - coredge demo
+# copied from ccs-helm-charts
+
+global:
+  ## Override for PostgresDB architecture
+  ## global.postgresql.architecture.standalone Set to 'false' deploys a postgresql as a cluster with High Availability
+  ## global.postgresql.architecture.standalone Set to 'true' deploys postgresql in standalone mode with no High Availability
+  #
+  
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio 
+  imagePullPolicy: &imagePolicy Always
+  imagePullSecrets: []
+  storageClass: &storageClass ""
+
+  postgresql:
+    architecture:
+      standalone: false
+    ### Config overrride to use external Postgres
+    ### This will not deploy postgresql with ccp
+    external:
+      host: ""
+      port: ""
+      user: ""
+      database: ""
+      password: ""
+
+  ## Config override for AuditDB Postgres server details
+  auditdb:
+    host: ''
+    port: ''
+    database: ''
+    username: ''
+    password: ''      
+
+## Postgresql HA Configuration
+## Deploys a postgresql cluster in HA configuration
+## Requires Zalando Operator running on the cluster or in the same namespace
+postgresqlHA:
+  ## Postgresql cluster name prefix
+  image: docker.io/coredgeio/spilo-16:3.2-p3
+  ## Support PG Versions: 12 - 16
+  ## Input only Major Version
+  pgVersion: '15'
+  maxconnections: "300"
+  ## Database user and password configuration
+  creds:
+    user: 'ccs'
+    pass: 'ccsdbadmin'
+  ## No. of postgres cluster nodes. 
+  ## Minimum 3 for HA. Must be Odd number
+  replicaCount: '3'
+  ## Postgres LoadBalancer override
+  loadBalancer:
+    master: false
+    replica: false
+  ## Persistent Volume size override
+  volume:
+    size: 10Gi
+  ## Postgres resources configuration override
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+      # hugepages-2Mi: 128Mi
+      # hugepages-1Gi: 1Gi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+      # hugepages-2Mi: 128Mi
+      # hugepages-1Gi: 1Gi
+  ## Postgres pg_hba configuration override
+  pg_hba: []
+    # - hostssl all             all          0.0.0.0/0                md5
+    # - host    all             all          0.0.0.0/0                md5
+    # - hostssl all             all          0.0.0.0/0                trust
+    # - host    all             all          0.0.0.0/0                trust
+  ## Enable postgres & patroni metrics
+  monitoring:
+    enabled: false
+
+## Postgresql Operator configuration
+## This operator will manage the lifecycle of the above postgresql cluster
+postgres-operator:
+  enabled: true
+  registry: docker.io
+  repository: coredgeio/postgres-operator
+  tag: v1.12.2
+  pullPolicy: "IfNotPresent"
+  configMajorVersionUpgrade:
+    # "off": no upgrade, "manual": manifest triggers action, "full": minimal version violation triggers too
+    major_version_upgrade_mode: "off"
+    # upgrades will only be carried out for clusters of listed teams when mode is "off"
+    # major_version_upgrade_team_allow_list:
+    # - acid
+    minimal_major_version: "12"
+    target_major_version: "16"
+  configKubernetes:
+    enable_cross_namespace_secret: false
+    enable_sidecars: true
+    # storage resize strategy, available options are: ebs, pvc, off or mixed
+    storage_resize_mode: pvc
+    watched_namespace: "*"  # listen to all namespaces
+    # toggles pod anti affinity on the Postgres pods
+    enable_pod_antiaffinity: false
+     # override topology key for pod anti affinity
+    pod_antiaffinity_topology_key: "kubernetes.io/hostname"
+  configConnectionPooler:
+    # docker image
+    connection_pooler_image: "docker.io/coredgeio/pgbouncer:master-32"
+    # max db connections the pooler should hold
+    connection_pooler_max_db_connections: 500
+  resources:
+    limits:
+      cpu: 400m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 250Mi
+  serviceAccount:
+    name: "postgresql-operator"
+
+
+
+## Postgresql HA cluster Configuration
+pgcluster:
+  ## Postgresql cluster name prefix
+  name: "keycloak"
+  image: docker.io/coredgeio/spilo-16:3.2-p3
+  ## Support PG Versions: 12 - 16
+  ## Input only Major Version
+  postgresVersion: 15
+  ## No. of postgres cluster nodes. 
+  ## Minimum 3 for HA. Must be Odd number
+  replica: "3"
+  ## Postgres LoadBalancer override
+  loadBalancer:
+    master: false
+    replica: false
+  ## Postgres configuration override parameters. 
+  ## Currently only supports max connections override
+  configurationOverride:
+    maxConnections: "100"
+  ## Connection Pooler instance override. Currently not supported
+  connectionPooler:
+    instances: "1"
+  ## Persistent Volume size override
+  volume:
+    size: 10Gi
+  ## Postgres resources configuration override
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+      # hugepages-2Mi: 128Mi
+      # hugepages-1Gi: 1Gi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+      # hugepages-2Mi: 128Mi
+      # hugepages-1Gi: 1Gi
+  ## Postgres pg_hba configuration override
+  pg_hba: []
+    # - hostssl all             all          0.0.0.0/0                md5
+    # - host    all             all          0.0.0.0/0                md5
+    # - hostssl all             all          0.0.0.0/0                trust
+    # - host    all             all          0.0.0.0/0                trust
+  ## Enable postgres & patroni metrics
+  monitoring:
+    enabled: false
+
+
+
+## Enable and configure keycloak postgresql backup
+## Currently only supported S3
+pgbackup:
+  enabled: false
+  ## S3 configuration. Any S3 provider is supported
+  s3:
+    endpoint: ""
+    bucket: ""
+    prefix: ""
+    accesskey: ""
+    secretkey: ""
+    ## Number of backups to retain in S3
+    retainCount: ""
+  ## Backup frequency/schedule
+  schedule: "0 0 * * *"
+  ## Persistence configuration for PVC used to store backup locally
+  persistence:
+    size: 10Gi

@@ -1,0 +1,67 @@
+# metering - airtel dev
+# copied from ccs-helm-charts
+
+global:
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  mongodb:
+    external:
+      enabled: false
+      configdb: 
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb: 
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb: 
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+replicaCount:
+  metering: 1
+
+
+redisdb:
+  host: "compass-redis"    # change if external
+  port: "6379"
+  pass: ""                 # only if auth enabled
+  tlsEnabled: false
+
+
+ordersConfig:
+  enabled: false
+  payment:
+    enabled: true
+    endpointDetails:
+      baseUrl: "https://api.dev.cloud42.ai/billing/v1/admin/instance/hold/wallet/balance"
+      httpMethod: "POST"
+      defaultHeaders:
+        apikey: "7Z4lXwekKnKNIO4VCFznjqgMs3lj91MT"
+
+  bmsRelease:
+    enabled: false
+    gracePeriod: 30
+    endpointDetails:
+      baseUrl: ""
+      httpMethod: ""
+      defaultHeaders:
+        apikey: ""
+
+  email:
+    enabled: false
+    resOrderTemplateID: 0
+    onDemOrderTemplateID: 0
+
+quotaOnboardingEnabled: false
+tenantQuotaInitEnabled: true

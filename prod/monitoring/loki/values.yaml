@@ -1,0 +1,41 @@
+# Prod overrides for `coredge-monitoring/helm/loki` chart.
+# Defaults live in `coredge-monitoring/helm/loki/values.yaml`.
+
+global:
+  loki:
+    enabled: false
+    retentionPeriod: "168h"
+    retentionDeletesEnabled: true
+
+
+fullnameOverride: loki
+
+image:
+  repository: docker.io/coredgeio/loki
+  tag: "2.9.7"
+  pullPolicy: IfNotPresent
+
+replicas: 3
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+service:
+  type: ClusterIP
+  port: 3100
+  targetPort: http-metrics
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+# This chart defaults to using an externally-managed Secret for loki.yaml.
+config:
+  existingSecret: loki-custom-config

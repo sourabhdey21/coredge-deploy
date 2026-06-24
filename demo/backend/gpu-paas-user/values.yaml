@@ -1,0 +1,122 @@
+# Default values for gpu-paas-user
+replicaCount: 1
+
+image:
+  repository: docker.io/akashsharma2401/user-service
+  pullPolicy: Always
+  tag: "update-create-tenant-2"
+
+nameOverride: ""
+fullnameOverride: "gpu-paas-user"
+
+environment: dev
+
+labels:
+  app: gpu-paas-user
+  environment: dev
+
+deployment:
+  progressDeadlineSeconds: 60
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+service:
+  type: NodePort
+  ports:
+    - name: default
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+    - name: grpc
+      port: 3001
+      targetPort: 3001
+      protocol: TCP
+    - name: listen
+      port: 80
+      targetPort: 8000
+      protocol: TCP
+
+container:
+  ports:
+    - containerPort: 3000
+      protocol: TCP
+  resources: {}
+  terminationMessagePath: /dev/termination-log
+  terminationMessagePolicy: File
+
+pod:
+  automountServiceAccountToken: false
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  terminationGracePeriodSeconds: 30
+
+# ConfigMap values
+configMap:
+  user_app_env: "development"
+  user_host_grpc: "dev-gpu-paas-user-service"
+  user_log_level: "debug"
+  user_new_relic_app_name: "dev-gpu-paas-user"
+  user_node_env: "development"
+  user_svc_url: "http://dev-gpu-paas-user-service.airev:80"
+  redis_base_url: ""
+  zapier_sales_url: ""
+  zapier_email_subscription_url: ""
+  zapier_email_unsubscribe_url: ""
+  comm_node_env: "development"
+  billing_app_env: "development"
+  shufti_callback_url: ""
+  billing_new_relic_app_name: "dev-gpu-paas-billing"
+  billing_svc_url: "http://dev-gpu-paas-billing-service.airev:80"
+  billing_host_grpc: "dev-gpu-paas-billing-service"
+  bridge_tower_admin_base_url: ""
+  bridge_tower_base_url: ""
+  payment_method_save_redirect_url: ""
+  cloudinary_cloud_name: ""
+  cloudinary_api_key: ""
+  cloudinary_api_secret: ""
+  ond_service_url: "http://dev-on-demand-services-service.gitex-gpu-paas:80"
+  gpu_paas_landing_url: ""
+  realtime_app_env: "development"
+  realtime_log_level: "debug"
+  realtime_new_relic_app_name: "dev-gpu-paas-realtime"
+  scheduler_app_env: "development"
+  scheduler_new_relic_app_name: "dev-gpu-paas-scheduler"
+  communication_new_relic_app_name: "dev-gpu-paas-communication"
+
+# Secret values (these should be overridden in production)
+secrets:
+  coredge_admin_url: "http://admin-portal"
+  coredge_keycloak_url: "http://keycloak"
+  coredge_admin_password: "Welcome@123"
+  coredge_admin_user: "ccsadmin"
+  shufti_client_secret: ""
+  shufti_url: ""
+  shufti_client_id: ""
+  user_mongodb_uri: "mongodb://sigma:pass@compass-configdb:27017/sigma_db?replicaSet=rs0&authSource=admin"
+  new_relic_license_key: ""
+  redis_full_url: "redis://notification-store:6380"
+  hcaptcha_secret_key: ""
+  comm_mongodb_uri: "mongodb://sigma:pass@compass-configdb:27017/sigma_db?replicaSet=rs0&authSource=admin"
+  resource_hierarchy: "organization"
+  s3_type: "minio"
+  s3_enabled: "false"
+  s3_endpoint: "https://oss.ae-auh1-5.test.core42.cloud"
+  s3_access_key: "Z7ZHK1E0YPZAO1WJHLFL"
+  s3_secret_key: "Jvsmy/zFQc3Py1/+sdSoG6NpWXYJ0K5cEIeMcWiB"
+  s3_bucket: "documents"
+  s3_use_ssl: "true"
+  smtp_port: "587"
+  smtp_host: "smtp.office365.com"
+  smtp_starttls: "true"
+  smtp_user: "relay@coredge.io"
+  smtp_pass: "V@626583763976ov"
+  smtp_from: "relay@coredge.io"
+  email_provider: "SMTP"
+  tls_enabled: "true"
+  auth_enabled: "true"

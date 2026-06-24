@@ -1,0 +1,98 @@
+# QA core-infra Kafka values.
+# Based on dev/core-infra/kafka/values.yaml with QA-safe adjustments for a shared cluster.
+
+global:
+  imageRegistry: ""
+
+# =============================================================================
+# CLEANUP HOOK
+# =============================================================================
+cleanupHook:
+  image: "bitnami/kubectl:1.29.0"
+
+# =============================================================================
+# STRIMZI KAFKA OPERATOR
+# =============================================================================
+# If dev and qa are deployed into the same Kubernetes cluster (different namespaces),
+# keep only ONE Strimzi operator to avoid conflicts. Dev enables it already.
+strimzi-kafka-operator:
+  enabled: false
+  watchAnyNamespace: true
+
+# =============================================================================
+# KAFKA UI
+# =============================================================================
+kafka-ui:
+  enabled: true
+  image:
+    registry: ghcr.io
+    repository: kafbat/kafka-ui
+    tag: "v1.4.2"
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: kafka-cluster
+          bootstrapServers: kafka-cluster-kafka-bootstrap:9092
+  service:
+    type: NodePort
+    # NodePorts are cluster-wide; pick a different port than dev to avoid conflicts.
+    nodePort: 30599
+
+# =============================================================================
+# KAFKA CLUSTER
+# =============================================================================
+kafkaCluster:
+  enabled: true
+  name: kafka-cluster
+
+  kafka:
+    version: "3.9.0"
+    listeners:
+      plain:
+        enabled: true
+        port: 9092
+      tls:
+        enabled: true
+        port: 9093
+      external:
+        enabled: true
+        port: 9094
+        type: nodeport
+    config:
+      offsetsTopicReplicationFactor: 1
+      transactionStateLogReplicationFactor: 1
+      transactionStateLogMinIsr: 1
+      defaultReplicationFactor: 1
+      minInsyncReplicas: 1
+
+  nodePool:
+    name: kafka
+    replicas: 1
+    roles:
+      - controller
+      - broker
+    storage:
+      type: jbod
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: 5Gi
+          deleteClaim: false
+
+  entityOperator:
+    topicOperator:
+      enabled: true
+    userOperator:
+      enabled: true
+
+# =============================================================================
+# KAFKA TOPICS
+# =============================================================================
+kafkaTopics:
+  enabled: true
+  clusterName: kafka-cluster
+  defaultRetentionMs: "7200000"       # 2 hours
+  defaultSegmentBytes: "1073741824"   # 1 GB
+  defaultReplicas: 1
+  topics: []
+

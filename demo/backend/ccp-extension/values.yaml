@@ -1,0 +1,172 @@
+# ccp-extension - coredge demo
+# copied from ccs-helm-charts
+
+global:
+  # storage class to use for persistent volumes, if empty fallback to
+  # default storage class
+  storageClass: &storageclass ""
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # this field is considered only when UseDailyBuilds is set to be false
+  # provides configuration of build tag to be used for container images
+  releaseTag: &releaseTag latest
+
+  #Set this to true for environments without internet and update the proxy details
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    no_proxy: "localhost,127.0.0.1,cluster.local,.svc,.svc.cluster.local"
+
+
+  ## Override for PostgresDB architecture
+  ## global.postgresql.architecture.standalone Set to 'false' deploys a postgresql as a cluster with High Availability
+  ## global.postgresql.architecture.standalone Set to 'true' deploys postgresql in standalone mode with no High Availability
+  postgresql:
+    architecture:
+      standalone: false
+    ### Config overrride to use external Postgres
+    ### This will not deploy postgresql with ccp
+    external:
+      host: ""
+      port: ""
+      user: ""
+      database: ""
+      password: ""
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+replicaCount: 1
+
+image: "ccp-extension"
+
+nodeSelector: {}
+
+app:
+  csg_flavor_name: "nw.Large"
+  fsg_flavor_name: "nw.Med"
+  fortigate_image_name: "fortios.qcow2"
+
+logger:
+  enabled: false
+
+f5:
+  enabled: false
+snow:
+  enabled: false 
+
+primary_region:
+  enabled: true
+
+default_network_type: ""
+vpc_mode: default
+
+external_network:
+  svc: "admin_net"
+  nat: "admin_net"
+  svc_gateway_ip: "192.168.1.1"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 6Gi
+  requests:
+    cpu: 100m
+    memory: 2Gi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Provider cluster configuration (ConfigMap: ccp-provider-cluster-config)
+# All keys are optional; missing keys are simply omitted from the ConfigMap.
+providerClusterConfig:
+  enabled: false
+  name: ccp-provider-cluster-config
+
+  # Production: Create clusters for service-ckp subnets only
+  INFRA_CLUSTER_SUBNET_TYPES: "service-ckp"
+
+  # VM flavors
+  PROVIDER_CLUSTER_MASTER_FLAVOR: "132"
+  PROVIDER_CLUSTER_WORKER_FLAVOR: "132"
+
+  # VM Volume Sizes (GB)
+  PROVIDER_CLUSTER_MASTER_VOLUME_SIZE: "100"
+  PROVIDER_CLUSTER_WORKER_VOLUME_SIZE: "100"
+
+  # VM credentials are sourced from `providerClusterSecret` (see below)
+
+  # Image
+  PROVIDER_CLUSTER_IMAGE_NAME: "rhel9.4-pankaj-ckp-cert"
+
+  # Kubernetes
+  PROVIDER_CLUSTER_K8S_VERSION: "v1.33.7-00"
+  PROVIDER_CLUSTER_K8S_CNI: "calico"
+  PROVIDER_CLUSTER_K8S_CNI_VERSION: ""
+
+  # Proxy
+  PROVIDER_CLUSTER_PROXY_ENABLED: "false"
+  PROVIDER_CLUSTER_PROXY_URL: "http://192.168.0.28:3128"
+  PROVIDER_CLUSTER_NOPROXY_URL: "internal.coredge.io,localhost,127.0.0.1,10.96.0.0/12,10.244.0.0/16,.svc,.svc.cluster.local,cluster.local,192.168.100.0/24,100.65.228.0/24,n1devcmp-user.airteldev.com,100.65.0.0/16,100.65"
+
+  # NFS
+  PROVIDER_CLUSTER_NFS_ENABLED: "false"
+  PROVIDER_CLUSTER_NFS_PATH: "/mnt/nfs_share"
+
+  # LoadBalancer
+  PROVIDER_CLUSTER_LOADBALANCER_ENABLED: "false"
+
+  # Registry
+  PROVIDER_CLUSTER_LOCAL_REGISTRY_ENABLED: "true"
+  PROVIDER_CLUSTER_LOCAL_REGISTRY_URL: "100.65.245.50"
+  REG_USERNAME: ""
+  REG_PASSWORD: ""
+
+  # Provider cluster components
+  PROVIDER_CLUSTER_TYPE: "k8s"
+  PROVIDER_CLUSTER_ENABLE_METRICS_SERVER: "yes"
+  PROVIDER_CLUSTER_ENABLE_PROMETHEUS_OPERATOR_CRDS: "yes"
+  PROVIDER_CLUSTER_ENABLE_CERT_MANAGER: "yes"
+  PROVIDER_CLUSTER_ENABLE_TRIDENT: "yes"
+  PROVIDER_CLUSTER_ENABLE_CE_OPA: "yes"
+  PROVIDER_CLUSTER_ENABLE_KAMAJI: "yes"
+  PROVIDER_CLUSTER_KAMAJI_VERSION: "26.2.3"
+
+  # MetalLB
+  PROVIDER_CLUSTER_METALLB_TAG_VERSION: "0.14.8"
+  PROVIDER_CLUSTER_METALLB_VERSION: "0.15.3"
+
+# Provider cluster credentials Secret (created by parent chart when enabled)
+providerClusterSecret:
+  enabled: false
+  name: ccp-provider-cluster-secret
+  PROVIDER_CLUSTER_VM_USERNAME: "k8s-staging"
+  PROVIDER_CLUSTER_VM_PASSWORD: "Staging@123"

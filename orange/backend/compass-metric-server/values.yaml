@@ -1,0 +1,40 @@
+# compass-metric-server - airtel dev
+# copied from ccs-helm-charts
+
+replicaCount:
+  compassMetricServer: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+  UseDailyBuilds: false
+
+  geolocation:
+    host: ""
+    port: ""
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+clusterManager:
+  enabled: true
+
+trivy:
+  enabled: false
+  defaultServer:
+    hostName: ""
+    port: "4954"
+    scheme: "https"
+    allowInsecure: false
+    customHeaders: []

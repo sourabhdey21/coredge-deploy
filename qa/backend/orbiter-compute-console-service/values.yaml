@@ -1,0 +1,35 @@
+# orbiter-compute-console-service - coredge dev
+
+global:
+  repository: &repository coredgeio
+  releaseTag: &releaseTag latest
+  imagePullPolicy: &imagePolicy Always
+
+replicaCount: 1
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Keycloak OIDC - point to the cluster keycloak instance
+keycloak:
+  issuer: "http://keycloak:8080/realms/cloud"
+  jwksURL: "http://keycloak:8080/realms/cloud/protocol/openid-connect/certs"
+  audience: "pam-service"
+
+# Redis: shared cluster instance
+redis:
+  host: "notification-store"
+  port: "6380"
+
+# OpenStack VNC plugin - fill in to enable VNC console proxying
+openstack:
+  authURL: ""
+  username: ""
+  password: ""
+  projectName: ""
+  regionName: ""

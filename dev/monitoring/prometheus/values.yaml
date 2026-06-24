@@ -1,0 +1,36 @@
+# Dev overrides for `coredge-monitoring/helm/prometheus` chart.
+# Defaults live in `coredge-monitoring/helm/prometheus/values.yaml`.
+
+server:
+  # NOTE: In this chart, `server.name` is used as the *resource base name*
+  # via `prometheus.server.fullname` helper, so this controls the Service name
+  # Grafana points to (e.g. `prometheus-server`).
+  name: prometheus-server
+
+  replicaCount: 1
+
+  global:
+    scrape_interval: 15s
+
+  image:
+    repository: docker.io/coredgeio/prometheus
+    tag: v2.51.0
+
+  service:
+    type: ClusterIP
+    servicePort: 80
+
+  retention: "15d"
+  retentionSize: ""
+
+  persistentVolume:
+    enabled: true
+    size: 10Gi
+
+  resources: {}
+
+configmapReload:
+  prometheus:
+    image:
+      repository: docker.io/coredgeio/prometheus-config-reloader
+      tag: v0.72.0

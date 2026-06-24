@@ -1,0 +1,78 @@
+# container-registry - coredge demo
+# copied from ccs-helm-charts
+
+global:
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+replicaCount:
+  containerRegistry: 1
+
+
+storage:
+  # prefix for bucket name for registries should be configured here
+  # default prefix will be added if nothing is configured
+  bucketPrefix: 
+  s3:
+    endpoint: https://oss.ae-auh1-5.test.core42.cloud
+    accessKey: Z7ZHK1E0YPZAO1WJHLFL
+    secretKey: Jvsmy/zFQc3Py1/+sdSoG6NpWXYJ0K5cEIeMcWiB
+    skipTlsVerify: true
+ 
+
+#storage:
+#  cephS3:
+#    userId: ""
+#    endpoint: ""
+#    accessKey: ""
+#    secretKey: ""
+#  s3:
+#    endpoint: ""
+#    accessKey: ""
+#    secretKey: ""
+#  ecs:
+#    endpoint: ""
+#    s3Endpoint: ""
+#    username: ""
+#    password: ""
+#    accessKey: ""
+#    secretKey: ""
+#    namespace: ""
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

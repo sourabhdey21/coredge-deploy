@@ -1,0 +1,555 @@
+# auth-service - coredge demo
+# copied from ccs-helm-charts
+
+replicaCount:
+  orbiterAuth: 1
+
+global:
+  # deployment environment indication for deployer to enable relevant
+  # environment specific configuration, currentely only environment
+  # supported is AWS
+  # default value is empty string indicating no special requirements
+  # for the environment
+  smtp:
+    enabled: false
+    senderEmail: "relay@coredge.io"
+    senderName: "Relay DFlare Admin"
+    smtpHost: "smtp.office365.com"
+    smtpPort: 25
+    authRequired: true
+    username: "relay@coredge.io"
+    password: "V@626583763976ov"
+
+  # Global flag to indicate use of domain configuration throughout the application
+  dnsEnabled: &dnsEnabled false
+
+  externalIP: &controllerIP 127.0.0.1
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  tenantManagement:
+    # allow tenant management, providing capability to create multiple
+    # tenants enabling multi-tenancy
+    enabled: false
+    # configure if registeration process is enabled and SMTP configuration
+    # to be used for triggering emails to complete the overall flow
+    # enabling email verifications and welcome emails
+    register:
+      enabled: false
+
+  airtelPlugin:
+    enabled: true
+
+  containerRegistry:
+    enabled: false
+
+  baremetalManager:
+    enabled: false
+
+  storagePlugin:
+    enabled: false
+
+  networkManager:
+    enabled: false
+
+  metering:
+    enabled: true
+
+  tcpwaveExtension:
+    enabled: false
+
+  securityPlugin:
+    enabled: false
+
+  # 
+  aiOrchestrator:
+    enabled: false
+
+  # CMP portal, to create service request eg: JIRA, serviceNow
+  orbiterTicketingService:
+    enabled: true
+
+
+  ## Configuration for exposing frontend URLs
+  ## DNS hostnames considered only when global.dnsEnabled is 'true'
+  ## Othwerwise NodePorts considered
+  frontend:
+    admin:
+      domain: &adminDomain ""
+      tlsSecret: &adminTls ""
+    userPortal:
+      domain: &userDomain ""
+      tlsSecret: &userTls ""
+      nodePort: &frontendNodePort "32500"
+    vmconsole:
+      domain: &vmconsoleDomain ""
+      tlsSecret: &vmconsoleTls ""
+      nodePort: &vmconsoleNodePort "32700"
+    # For Production environment we require kyc status validation
+    # However, for dev and test environments we should be able to skip
+    # these validations
+    # Setting skipKyc true will bypass this validation
+    # Note: This configuration should not be used for Production env
+    skipKyc: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+  redisdb:
+    host: ""
+    port: ""
+    pass: ""
+    tlsEnabled: false
+
+  openfga:
+    enabled: true
+    endpoint: "http://openfga:8080"
+    storeId: 01KM37KDA8SMYXGVMNBC0DP6SF
+    apiToken: MYPreSharedToken1
+    modelProfile: domain-hierarchy
+    authModel: resourceModel
+
+  # enable loading default repositories for better user experience with
+  # preconfigured helm repositories
+  defaultRepos:
+    enabled: true
+
+  preOnboardedTenant:
+    enabled: true
+    name: "coredge-cloud"
+    admin:
+      firstname: "coredge"
+      lastname: "admin"
+      email: "admin@coredge.com"
+      username: "coredgeadmin"
+      password: "Welcome@123"
+
+  # this configuration is used for integrating geolocation component
+  # with compass, the geolocation component is used for all location
+  # services like conversion between coordinates and geolocation &
+  # conversion from IP to location, the geolocation component exposes its
+  # functionality via gRPC services so compass requires this config info
+  # to connect with the geolocation component, currently we DO NOT support
+  # encrypted connections using certificates or any other mechanism
+  # hence it is expected that the geolocation component reside
+  # within the same cluster as the compass deployment
+  geolocation:
+    # grpc host name used to connect with geolocation component
+    # if deployed within the same cluster as compass, this will be
+    # of the form: <svc>.<namespace>
+    host: ""
+    # grpc port used to connect with geolocation component
+    # if deployed within the same cluster as compass, this will be
+    # geolocation component's svc port
+    port: ""
+
+
+resourceAlias:
+  - name: domain
+    alias: domain
+  - name: project
+    alias: project
+  - name: computes
+    alias: computes
+  - name: file-storage
+    alias: file-storage
+
+roleNameAlias:
+  domain:
+    - name: admin
+      alias: admin
+    - name: manager
+      alias: manager
+    - name: member
+      alias: member
+  project:
+    - name: admin
+      alias: admin
+    - name: manager
+      alias: manager
+    - name: member
+      alias: member
+
+keycloak:
+  # keycloak clientID (needs to be a public client)
+  clientId: controller
+  # loginTheme for the keycloak
+  defaultLoginTheme: "fluid"
+  # accountTheme for the keycloak
+  defaultAccountTheme: ""
+  # adminTheme for the keycloak
+  defaultAdminTheme: ""
+  # emailTheme for the keycloak
+  defaultEmailTheme: ""
+  # setupKeycloakConfidentialClient indicates whether to set up a confidential client
+  setupKeycloakConfidentialClient: false
+  # enable2FA indicates whether to enable two-factor authentication
+  enable2FA: false
+  # introspection client credentials
+  introspect:
+    clientId: ""
+    clientSecret: ""
+  # keycloak URL used in OIDC for fetching well-known config
+  url: https://keycloak:8443
+  # list of public clients that need to be created at deploy time
+  clients:
+  - controller
+  # name of the realm that needs to be created at deploy time
+  realm: "cloud"
+  # DNS for the origin that we want to allow when accessing the client
+  dns: ""
+  # user credentials for the default realm user that will be created
+  # along with creation of the realm
+  admin:
+    username: &adminUsername "ccsadmin"
+    password: &adminUserPass "Welcome@123"
+    firstname: &adminFirstname "CCS"
+    lastname: &adminLastname "Admin"
+    email: &adminUserEmail "info@coredge.io"
+  # IDP config for the IDP that needs to be created
+  # at deploy time in the realm created at deploy time
+  idpConfig:
+    enabled: false
+    name: ""
+    # auto onboarding allows users to directly use the IDP and create a new account
+    # instead of requiring the user to exist in the system beforehand
+    allowAutoOnboarding: true
+    # provider ID can either be OIDC or of type facebook, microsoft, google etc.
+    providerId: "oidc"
+    clientId: ""
+    clientSecret: ""
+    clientAuthMethod: ""
+    authorizationUrl: ""
+    tokenUrl: ""
+  # enable below section while having the need to work with multiple
+  # redirect uris and web origins
+  # usually this case is more relevant while having the need to work
+  # with different dns for auth, regular portal and admin portal
+  # or even if a different tenat url is needed
+  redirectURIs:
+  - "*"
+  #
+  # always used in conjection with redirectURIs config
+  webOriginsURIs:
+  - "*"
+gateway:
+  # additional enpoint forwarding configuration
+  #locations:
+  #- prefix: /api/demo
+  #  endpoint: http://cloud-manager:8080
+  #  rewritePrefix: /
+  #  accessType: unscoped
+  locations:
+  - prefix: /api/cloud-manager
+    endpoint: http://cloud-manager:8080
+    rewritePrefix: /
+  - prefix: /api/container-ingress
+    endpoint: http://compass-cluster-manager:8060
+    accessType: public
+    rewritePrefix: /
+  - prefix: /api/container-kubeapi
+    endpoint: http://compass-cluster-manager:8060
+    accessType: unscoped
+  - prefix: /api/cluster-admin
+    endpoint: http://compass-cluster-manager:8080
+  - prefix: /api/cluster-manager/v1/domain
+    endpoint: http://compass-cluster-manager:8080
+    rewritePrefix: /v1/domain
+  - prefix: /api/cluster-manager/v1
+    endpoint: http://compass-cluster-manager:8080
+    rewritePrefix: /v1
+    accessType: unscoped
+  - prefix: /api/cluster-manager/v1/download
+    endpoint: http://compass-cluster-manager:8080
+    rewritePrefix: /v1/download
+    accessType: public
+  - prefix: /api/slurmrest
+    endpoint: http://compass-api:9085
+    rewritePrefix: /
+  - prefix: /ws/slurmrest
+    endpoint: http://compass-api:9085
+    rewritePrefix: /
+  - prefix: /api/scheduler
+    endpoint: http://orbiter-scheduler:8080
+  - prefix: /api/orchestrator
+    endpoint: http://compass-orchestrator:8080
+  - prefix: /api/auth-mgmt
+    consumeLocally: true
+    allowRootTenantOnly: false
+  - prefix: /api/auth-service
+    consumeLocally: true
+  - prefix: /api/auth-service/v1/download
+    consumeLocally: true
+    accessType: public
+  - prefix: /api/accessibility
+    consumeLocally: true
+    accessType: unscoped
+  - prefix: /api/ingress
+    endpoint: http://compass-api:8071
+    rewritePrefix: /
+  - prefix: /ws/terminal
+    endpoint: http://compass-term:8000
+    rewritePrefix: /
+  - prefix: /ws/robincli
+    endpoint: http://compass-term:8001
+    rewritePrefix: /
+  - prefix: /ws/compass
+    endpoint: http://compass-api:9080
+  - prefix: /api/container-registry
+    endpoint: http://container-registry:8080
+  - prefix: /ws/container-registry
+    endpoint: http://container-registry:9080
+  - prefix: /api/storage-plugin
+    endpoint: http://storage-plugin:8080
+  - prefix: /api/storage-admin
+    endpoint: http://storage-plugin:8080
+  - prefix: /api/network-admin
+    endpoint: http://network-manager:8080
+  - prefix: /api/network-manager
+    endpoint: http://network-manager:8080
+    rewritePrefix: /api/network-manager
+  - prefix: /api/tenant-management
+    endpoint: http://tenant-managment-service:8080
+    rewritePrefix: /
+  - prefix: /api/license
+    endpoint: http://orbiter-metering:8080
+  - prefix: /api/ticketing-service
+    endpoint: http://orbiter-ticketing-service:8080
+  - prefix: /api/metering
+    endpoint: http://orbiter-metering:8080
+  - prefix: /api/catalog
+    endpoint: http://orbiter-metering:8080
+  - prefix: /api/quota
+    endpoint: http://orbiter-metering:8080
+  - prefix: /v1/download
+    endpoint: http://compass-api:8085
+    accessType: public
+  - prefix: /v1
+    endpoint: http://compass-api:8085
+  - prefix: /
+    endpoint: http://compass-api:8085
+    accessType: public
+  - prefix: /api/myaccount
+    consumeLocally: true
+    accessType: unscoped
+  - endpoint: http://tcpwave:8000
+    prefix: /api/v1/zones
+  - endpoint: http://tcpwave:8000
+    prefix: /api/v1/ipam
+  - endpoint: http://tcpwave:8000
+    prefix: /api/v1/ipam_organisation
+  - endpoint: http://tcpwave:8000
+    prefix: /api/v1/ipam_quota
+  - prefix: /adminapi
+    endpoint: http://admin-platform:5000
+  - prefix: /socket
+    endpoint: http://sockets-server:5000
+    accessType: unscoped
+  - prefix: /api/v1/users/me
+    endpoint: http://core-mgmt:7150
+    accessType: unscoped
+  - prefix: /api/v1/organisations/is_subscribed
+    endpoint: http://core-mgmt:7150
+    accessType: unscoped
+  - prefix: /api/v1/organisations/project_scopes/
+    endpoint: http://core-mgmt:7150
+    accessType: unscoped
+  - endpoint: http://autoscaling-service:7181
+    prefix: /api/v1/autoscaling-group
+  - endpoint: http://autoscaling-service:7181
+    prefix: /api/v2.1/autoscaling-group
+  - accessType: public
+    endpoint: http://autoscaling-service:7181
+    prefix: /api/v1/autoscaling-group/openstack-events-s1
+  - accessType: public
+    endpoint: http://autoscaling-service:7181
+    prefix: /api/v1/autoscaling-group/openstack-events-s2
+  - endpoint: http://compute-service:7110
+    prefix: /api/v1/computes
+  - endpoint: http://compute-service:7110
+    prefix: /api/v2/computes
+  - endpoint: http://compute-service:7110
+    prefix: /api/v2.1/computes
+  - endpoint: http://compute-service:7110
+    prefix: /api/v1/vpn
+  - endpoint: http://core-mgmt:7150
+    prefix: /api/v1/projects
+  - endpoint: http://compute-service:7110
+    prefix: /api/v1/metrics
+  - endpoint: http://volume-service:7120
+    prefix: /api/v1/volumes
+  - endpoint: http://certificates-manager:7140
+    prefix: /api/v1/certificates
+  - endpoint: http://neutron-service:7160
+    prefix: /api/v1/networks
+  - endpoint: http://neutron-service:7160
+    prefix: /api/v2.1/networks
+  - endpoint: http://neutron-service:7160
+    prefix: /api/v1/load-balancers
+  - endpoint: http://neutron-service:7160
+    prefix: /api/v1/dnszones
+  - endpoint: http://neutron-service:7160
+    prefix: /api/v1/firewalls
+  - endpoint: http://archival-storage:7170
+    prefix: /api/v1/archival-storages
+  - endpoint: http://core-mgmt:7150
+    prefix: /api/v1/role_permission_group
+  - endpoint: http://core-mgmt:7150
+    prefix: /api/v1/organisations
+  - endpoint: http://core-mgmt:7150
+    prefix: /api/v1/tickets
+  - endpoint: http://core-mgmt:7150
+    prefix: /api/v1/providers
+  - endpoint: http://core-mgmt:7150
+    prefix: /api/v1/container-projects
+  - endpoint: http://core-mgmt:7150
+    prefix: /api/v1
+  - prefix: /auth
+    endpoint: http://core-mgmt:7150
+    rewritePrefix: /
+  - endpoint: http://ccp-extension:8000
+    prefix: /api/v1/admin/network
+  - endpoint: http://ccp-extension:8000
+    prefix: /api/v1/admin/logging
+  - endpoint: http://ccp-extension:8000
+    prefix: /api/v1/admin/fortimanager
+  - endpoint: http://ccp-extension:8000
+    prefix: /api/v1/admin/fortiflex
+  - endpoint: http://ccp-extension:8000
+    prefix: /ext
+  - endpoint: http://ccp-extension:8000
+    prefix: /api/v1/admin/ipam_vip
+  - endpoint: http://ccp-extension:8000
+    prefix: /adminapi/v1/admin/firewalls/
+    rewritePrefix: /api/v1/admin/firewalls/
+  - endpoint: http://airtel-plugin:8080
+    prefix: /api/airtel
+    rewritePrefix: /
+  - accessType: public
+    endpoint: http://airtel-plugin:8060
+    prefix: /api/airtel-ingress
+    rewritePrefix: /
+  - accessType: unscoped
+    endpoint: http://airtel-plugin:8060
+    prefix: /api/airtel-kubeapi
+  - accessType: public
+    endpoint: http://airtel-plugin:8080
+    prefix: /api/airtel/v1/download
+    rewritePrefix: /v1/download
+  - endpoint: http://orbiter-metering:8080
+    prefix: /api/quota
+  - endpoint: http://orbiter-metering:8080
+    prefix: /api/catalog-admin
+  - endpoint: http://orbiter-metering:8080
+    prefix: /api/service-admin
+  - endpoint: http://orbiter-metering:8080
+    prefix: /api/service
+  - endpoint: http://tcpwave:8000
+    prefix: /api/v1/rev_zones
+  - endpoint: http://dbaas-orchestrator.dbaas:8000
+    prefix: /api/v1/dbaas
+  - accessType: public
+    endpoint: http://autoscaling-service:7181
+    prefix: /api/v1/autoscaling-group/webhook
+  - endpoint: http://ccp-security:8000
+    prefix: /api/v1/ccp-security
+  - endpoint: http://backup-service:7030
+    prefix: /api/v1/backups
+  - endpoint: http://alarm-manager:8000
+    prefix: /api/v1/alerts
+  - endpoint: http://alarm-manager:8000
+    prefix: /api/v1/notifications
+  - endpoint: http://alarm-manager:8000
+    prefix: /api/v1/compasss
+  - endpoint: http://compass-api:8085
+    prefix: /api/compass
+  - endpoint: http://cmdb-service:8086
+    prefix: /api/v1/cmdb
+  - endpoint: http://fluid-monitoring-service:8000
+    prefix: /api/v1/monitoring
+  - endpoint: http://fluid-monitoring-service:8000
+    prefix: /api/monitoring    
+  - endpoint: http://fluid-monitoring-service:8000
+    prefix: /api/v2/monitoring
+  - prefix: /api/storage-admin/v1
+    endpoint: http://storage-plugin:8080
+    accessType: super-admin
+  - endpoint: http://volume-service:7120
+    prefix: /api/v2/volumes
+  - endpoint: http://volume-service:7120
+    prefix: /api/v2.1/volumes
+  - endpoint: http://dbaas-k8s:8000
+    prefix: /api/v1/databases
+    rewritePrefix: /api/v1
+  - prefix: /api/multicloud-admin
+    endpoint: http://compass-multicloud-manager:8080
+  - prefix: /api/auth-service/v1/auth/login-method
+    endpoint: http://orbiter-auth:8080
+    accessType: public
+    consumeLocally: true
+  payment:
+    enabled: false
+
+limits:
+  events:
+    maxSize: 1000000 # max memory allowed to be used in bytes for events per domain
+    maxEntries: 5000 # max number of entries allowed to be used for events per domain
+  accesslogs:
+    maxSize: 1000000 # max memory allowed to be used in bytes for events per domain
+    maxEntries: 5000 # max number of entries allowed to be used for events per domain
+  gateway:
+    rateLimit: 200
+    burstSize: 500
+    
+redisdb:
+  host: "notification-store"     
+  port: "6380"
+  pass: ""                
+  tlsEnabled: false
+
+email:
+  enabled: true
+  userAddTemplateId: 0
+  domainKycStatusTemplateID: 103
+  tenUserKycStatusTemplateID: 104
+  
+projectQuota:
+  enabled: true
+  terminology: Project
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

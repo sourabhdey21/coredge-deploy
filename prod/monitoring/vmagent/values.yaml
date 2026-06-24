@@ -1,0 +1,68 @@
+global:
+  vmagent:
+    enabled: true
+  victoriaMetricsOperator:
+    enabled: true
+  vmauth:
+    enabled: true
+
+enabled: true
+
+# fullnameOverride sets the VMAgent resource name.
+fullnameOverride: "vmagent"
+
+spec:
+  scrapeInterval: 30s
+  selectAllByDefault: true
+  serviceAccountName: vmagent
+  configReloaderImage: "docker.io/coredgeio/victoria-metrics-operator:config-reloader-v0.67.0"
+  serviceScrapeSelector: {}
+  serviceScrapeNamespaceSelector: {}
+  podScrapeSelector: {}
+  podScrapeNamespaceSelector: {}
+  image:
+    repository: docker.io/coredgeio/vmagent
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  # Mount etcd certs from master node for etcd scraping
+  volumes:
+    - name: etcd-certs
+      hostPath:
+        path: /etc/kubernetes/pki/etcd
+        type: Directory
+  volumeMounts:
+    - name: etcd-certs
+      mountPath: /etc/vm/etcd-certs
+      readOnly: true
+  # Schedule VMAgent on master nodes where etcd certs exist
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Exists"
+      effect: "NoSchedule"
+  replicaCount: 1
+  statefulMode: true
+  statefulStorage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+  extraArgs:
+    promscrape.maxScrapeSize: "67108864"  # 64MB — apiserver metrics response exceeds default 16MB
+  remoteWrite:
+    - url: "http://vmauth-vmauth:8427/insert/0/prometheus/api/v1/write"
+  additionalScrapeConfigs:
+    key: prometheus.yaml
+    name: vmagent-additional-scrape-configs
+
+nodePort: 30429

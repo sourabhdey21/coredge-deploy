@@ -1,0 +1,63 @@
+# container-registry - core42 dev
+# copied from ccs-helm-charts
+
+global:
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+replicaCount:
+  containerRegistry: 1
+
+
+storage:
+  # prefix for bucket name for registries should be configured here
+  # default prefix will be added if nothing is configured
+  bucketPrefix: 
+  s3:
+    endpoint: https://ceph.coredge.internal:8443
+    accessKey: KJI8LM7APSHCXFB491YU
+    secretKey: bF2QHMjrmAFoIzLPcT6jWnZqazQgOvUvyJddBEfC
+    skipTlsVerify: true
+ 
+
+#storage:
+#  cephS3:
+#    userId: ""
+#    endpoint: ""
+#    accessKey: ""
+#    secretKey: ""
+#  s3:
+#    endpoint: ""
+#    accessKey: ""
+#    secretKey: ""
+#  ecs:
+#    endpoint: ""
+#    s3Endpoint: ""
+#    username: ""
+#    password: ""
+#    accessKey: ""
+#    secretKey: ""
+#    namespace: ""

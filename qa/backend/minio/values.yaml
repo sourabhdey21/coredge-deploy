@@ -1,0 +1,7 @@
+mode: standalone
+persistence:
+  size: 10Gi
+rootUser: "minioadmin" # Change this from default
+rootPassword: "minioadmin" # Change this from default
+service:
+  type: ClusterIP # Or LoadBalancer/NodePort based on your needs

@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: orange-dev-frontend
+  namespace: argocd
+  labels:
+    customer: orange
+    env: dev
+    category: frontend
+spec: 
+  generators:
+    - list:
+        elements:
+          - app: admin-portal
+          - app: celery-flower
+          - app: user-portal
+          - app: mongo-express
+          - app: pgadmin
+  template: 
+    metadata: 
+      name: '{{app}}-orange-dev'
+      namespace: argocd
+      labels:
+        customer: orange
+        env: dev
+        category: frontend
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: orange-dev
+      # values repo first so it shows in argocd UI
+      sources:
+        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+          targetRevision: main
+          ref: values
+        - repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+          targetRevision: main
+          path: helm/frontend-charts/{{app}}
+          helm:
+            valueFiles:
+              - $values/orange/images.yaml
+              - $values/orange/frontend/{{app}}/values.yaml
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

@@ -1,0 +1,20 @@
+schedule: "0 * * * *"
+
+postgres:
+  host: openfga-postgres
+  database: openfga
+  port: "5432"
+  secretName: openfga-postgres
+
+pvc:
+  name: openfga-postgres-backup-pvc
+  size: 50Gi
+
+backup:
+  retainCount: 15
+
+s3:
+  enabled: false
+  secretName: s3-credentials
+
+localRetentionDays: 1

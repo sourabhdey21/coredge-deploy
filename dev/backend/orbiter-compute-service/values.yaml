@@ -1,0 +1,2 @@
+# Override chart defaults here as needed.
+# storagePlugin.host/port default to "storage-plugin:8090" (chart default).

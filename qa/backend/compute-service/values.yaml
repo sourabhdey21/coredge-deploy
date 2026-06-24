@@ -1,0 +1,74 @@
+# compute-service - core42 dev
+# copied from ccs-helm-charts
+
+global:
+  # indicates usage of external ingress, currently also acts as a
+  # switch to indicate use of domain configuration
+  dnsEnabled: &dnsEnabled false
+
+  # Ingress claas to be defined to Ingress configuration 
+  ingressClass: &ingressClass ""
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # this field is considered only when UseDailyBuilds is set to be false
+  # provides configuration of build tag to be used for container images
+  releaseTag: &releaseTag latest
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # external IP for controller, relevant, when domain is not
+  # configured to allow generation of server certificate validity using
+  # this IP address
+  externalIP: &controllerIP 172.16.109.149
+
+  # Flask Config (Development OR Production)
+  # TEMPORARY
+  flaskConfig: "production"
+
+  events:
+    enabled: false
+
+  frontend:
+    admin:
+      domain: &adminDomain ""
+      tlsSecret: &adminTls ""
+    userPortal:
+      domain: &userDomain ""
+      tlsSecret: &userTls ""
+      nodePort: &frontendNodePort "32500"
+    vmconsole:
+      domain: &vmconsoleDomain ""
+      tlsSecret: &vmconsoleTls ""
+      nodePort: &vmconsoleNodePort "32700"
+nodeSelector: {} 
+
+replicaCount: 1
+
+image: "fluid_platform"
+
+enabledServices: "compute,api"
+internetEnabledByDefault: true
+
+resources: 
+  limits:
+    cpu: 100m
+    # memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 100Mi
+
+celery:
+  enabled: true
+  replicaCount: 1
+  command: "celery -A app  worker --concurrency=2 --loglevel=debug -Q q_compute"
+  resources: 
+    limits:
+      cpu: 200m
+      memory: 500Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi

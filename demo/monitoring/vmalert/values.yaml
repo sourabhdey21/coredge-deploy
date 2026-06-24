@@ -1,0 +1,82 @@
+global:
+  vmalert:
+    enabled: false
+  vmauth:
+    enabled: true
+
+replicaCount: 1
+
+image:
+  repository: docker.io/coredgeio/vmalert
+  tag: v1.122.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8880
+  nodePort: 30223
+
+args:
+  datasource: "http://vmauth-vmauth:8427/select/0/prometheus"
+  notifier: "http://alertmanager:9093"
+  evaluationInterval: "1m"
+  remoteWrite: "http://vmauth-vmauth:8427/insert/0/prometheus"
+
+alerts:
+  NIC:
+    enabled: false
+  ckp:
+    enabled: true
+
+alertmanager:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: docker.io/coredgeio/alertmanager
+    tag: v0.27.0
+
+  service:
+    type: NodePort
+    port: 9093
+    nodePort: 30093
+
+  persistence:
+    size: 5Gi
+
+  # Group by labels — use "..." to group by all labels (one alert per unique label set)
+  # groupBy:
+  #   - "..."
+  groupBy:
+    - "alertname"
+    - "cluster"
+    - "namespace"
+    - "pod"
+    - "severity"
+
+  # Alertmanager timing
+  groupWait: "30s"
+  groupInterval: "10m"
+  repeatInterval: "1h"
+  webhookRepeatInterval: "10m"
+  emailRepeatInterval: "20m"
+
+  # Secret name where webhook URLs are stored
+  webhookSecretName: "alertmanager-webhook-secret"
+  # Add multiple webhook URLs — chart creates the secret automatically
+  teamsWebhookUrls:
+    - "https://default6fc131bd72da4e55bb855e873ab21d.c6.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/45a3a9273aa348a49b7a64a9313f5a45/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ueWa29v9Jp_Pqvots4AxYEDEf_lA1qfCgxF7Rlh-nCE"
+    - "https://default6fc131bd72da4e55bb855e873ab21d.c6.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/60e2551d83d54c2a8124e11b552e5a24/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=S9e0Q7WtM37bsC1D-QInaAnn1wQuTfXsJWH849X0aTo"
+  # Used only when teamsWebhookUrls is empty and secret is created manually
+  # Set this to the number of webhook-N keys in your manually created secret
+  webhookCount: 0
+
+  ## this is exmaple use yours
+  smtp:
+    enabled: false
+    smarthost: "smtp.gmail.com:587"
+    from: "amitesh.singh@coredge.io"
+    to: "amitesh.singh@coredge.io"
+    authUsername: "amiteshhsingh@gmail.com" 
+    authPassword: "qhjj llll dekn mrnp"
+    requireTLS: true

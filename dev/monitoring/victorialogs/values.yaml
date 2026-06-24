@@ -1,0 +1,59 @@
+global:
+  victoriaLogs:
+    enabled: true
+  vmauth:
+    enabled: true
+  imagePullSecrets: []
+  image:
+    registry: ""
+  compatibility:
+    openshift:
+      adaptSecurityContext: "auto"
+  cluster:
+    dnsDomain: cluster.local.
+
+vlselect:
+  enabled: true
+  name: ""
+  replicaCount: 1
+  image:
+    registry: ""
+    repository: docker.io/coredgeio/victoria-logs
+    tag: ""
+    variant: ""
+    pullPolicy: IfNotPresent
+  ports:
+    name: "http"
+  priorityClassName: ""
+  fullnameOverride: "vlselect"
+
+vlinsert:
+  enabled: true
+  name: ""
+  replicaCount: 1
+  image:
+    registry: ""
+    repository: docker.io/coredgeio/victoria-logs
+    tag: ""
+    variant: ""
+    pullPolicy: IfNotPresent
+  ports:
+    name: "http"
+  priorityClassName: ""
+  fullnameOverride: "vlinsert"
+
+vlstorage:
+  enabled: true
+  name: ""
+  replicaCount: 1
+  image:
+    registry: ""
+    repository: docker.io/coredgeio/victoria-logs
+    tag: ""
+    variant: ""
+    pullPolicy: IfNotPresent
+  ports:
+    name: "http"
+  priorityClassName: ""
+  fullnameOverride: "vlstorage"
+  retentionPeriod: "30d"

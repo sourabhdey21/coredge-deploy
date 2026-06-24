@@ -1,0 +1,47 @@
+# compass-controller - airtel dev
+# copied from ccs-helm-charts
+
+replicaCount:
+  compassController: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+  UseDailyBuilds: false
+
+  environment: ""
+  dnsEnabled: false
+
+  externalIP: "127.0.0.1"
+
+  frontend:
+    userPortal:
+      domain: ""
+      nodePort: "32500"
+
+  proxyProtocol:
+    enabled: false
+
+  controller:
+    mtls:
+      disabled: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+controller:
+  externalIP: "127.0.0.1"
+  proxyIPs:
+    - "127.0.0.1"
+    - "::1"

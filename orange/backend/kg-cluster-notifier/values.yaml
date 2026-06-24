@@ -1,0 +1,21 @@
+# kg-cluster-notifier - airtel dev
+# copied from ccs-helm-charts
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+  UseDailyBuilds: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""

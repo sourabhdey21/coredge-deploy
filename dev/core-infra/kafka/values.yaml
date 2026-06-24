@@ -1,0 +1,102 @@
+# For airgap deployments, set your private registry here and update
+# strimzi-kafka-operator.defaultImageRegistry and kafka-ui.image.registry below.
+# Images to mirror:
+#   - quay.io/strimzi/operator:0.47.0
+#   - quay.io/strimzi/kafka:0.47.0-kafka-3.9.0
+#   - ghcr.io/kafbat/kafka-ui:v1.4.2
+#   - docker.io/bitnami/kubectl:1.29.0
+global:
+  imageRegistry: ""
+
+# =============================================================================
+# CLEANUP HOOK
+# =============================================================================
+cleanupHook:
+  image: "bitnami/kubectl:1.29.0"
+
+# =============================================================================
+# STRIMZI KAFKA OPERATOR
+# =============================================================================
+strimzi-kafka-operator:
+  enabled: true
+  watchAnyNamespace: true   # default is false
+
+# =============================================================================
+# KAFKA UI
+# =============================================================================
+kafka-ui:
+  enabled: true
+  image:
+    registry: ghcr.io                 # default: docker.io
+    repository: kafbat/kafka-ui       # default: provectuslabs/kafka-ui
+    tag: "v1.4.2"
+  yamlApplicationConfig:
+    kafka:
+      clusters:
+        - name: kafka-cluster
+          bootstrapServers: kafka-cluster-kafka-bootstrap:9092
+  service:
+    type: NodePort
+    nodePort: 30598
+
+# =============================================================================
+# KAFKA CLUSTER
+# =============================================================================
+kafkaCluster:
+  enabled: true
+  name: kafka-cluster
+
+  kafka:
+    version: "3.9.0"
+    listeners:
+      plain:
+        enabled: true
+        port: 9092
+      tls:
+        enabled: true
+        port: 9093
+      external:
+        enabled: true
+        port: 9094
+        type: nodeport
+    config:
+      offsetsTopicReplicationFactor: 1
+      transactionStateLogReplicationFactor: 1
+      transactionStateLogMinIsr: 1
+      defaultReplicationFactor: 1
+      minInsyncReplicas: 1
+
+  nodePool:
+    name: kafka
+    replicas: 1
+    roles:
+      - controller
+      - broker
+    storage:
+      type: jbod
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: 5Gi
+          deleteClaim: false
+
+  entityOperator:
+    topicOperator:
+      enabled: true
+    userOperator:
+      enabled: true
+
+# =============================================================================
+# KAFKA TOPICS
+# =============================================================================
+kafkaTopics:
+  enabled: true
+  clusterName: kafka-cluster
+  defaultRetentionMs: "7200000"       # 2 hours
+  defaultSegmentBytes: "1073741824"   # 1 GB
+  defaultReplicas: 1
+
+  topics: []
+  # topics:
+  #   - name: my-topic
+  #     topicName: MY_TOPIC

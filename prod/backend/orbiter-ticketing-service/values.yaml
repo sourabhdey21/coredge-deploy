@@ -1,0 +1,123 @@
+# orbiter-ticketing-service - coredge prod
+# copied from ccs-helm-charts
+
+replicaCount: 1
+
+global:
+  smtp:
+    enabled: true      
+    senderEmail: "noreply@DFlare.com"
+    senderName: "DFlare Admin"      
+    smtpHost: "smtp.office365.com"
+    smtpPort: 587
+    authRequired: true       
+    username: "alert.lmu@apeiro.digital"     
+    password: "pylfdpbylbbpbcls"
+
+#   # repository from where the controller images are pulled for
+#   # controller
+#   repository: &repository coredgeio
+
+kafka:
+  brokers:
+    - "kafka-cluster-kafka-bootstrap:9092"
+  topic:
+    jiraEventTopic: "jiraEventTopic"
+    jiraWebhookInboundTopic: "jiraWebhookInboundTopic"
+    notificationTopic: "notificationTopic"
+
+events:
+  limits:
+    maxSize: 1000000  # 10MB in bytes
+    maxEntries: 1000
+
+s3:
+  accessKey: "YXI3Q2FB4RSXS2DWGCX5"
+  secretKey: "WTCOOj2iQpCkhg6Bfp0egb1JBKzFcCcRuREsW3MI"
+  endpoint: "10.10.40.15:8000"
+  bucket: "qa-sa-bucket"
+  isSecure: false
+
+jira:
+  projects:
+    - projectKey: "PROVIDER_JIRA"
+      customFields:
+        project: "customfield_10001"
+        tenant: "customfield_10002"
+        domain: "customfield_10003"
+        subCategory: "customfield_10004"
+        resource: "customfield_10005"
+        category: "customfield_10006"
+    - projectKey: "NETWORK"
+      customFields:
+        project: "customfield_100011"
+        tenant: "customfield_100022"
+        domain: "customfield_100033"
+        subCategory: "customfield_100044"
+        resource: "customfield_100055"
+        category: "customfield_100066"
+    - projectKey: "CS"
+      customFields:
+        project: "customfield_10059"
+        tenant: "customfield_10062"
+        domain: "customfield_10063"
+        subCategory: "customfield_10060"
+        resource: "customfield_10061"
+        category: "customfield_10058"
+
+webhookSecret: "U3NU8VeX2vxj720gyndV"
+
+category:
+  Compute:
+    - "Slurm"
+    - "Baremetal"
+    - "Kubernetes"
+    - "Virtual Machines"
+    - "Auto scaling Groups"
+    - "VM Snapshots"
+    - "Others"
+  Network:
+    - "VPC"
+    - "Subnet"
+    - "Others"
+  Storage:
+    - "Object Storage"
+    - "File"
+    - "File System"
+    - "Volume Snapshots"
+    - "Block"
+    - "Backup"
+    - "Others"
+  Others: 
+    - "Others"
+manageEngine:
+  customer: "UHC"
+  tokenEndpoint: "https://accounts.zoho.in/oauth/v2/token"
+
+motaCustomFields:
+  Category: "CloudPlatform Category"
+  SubCategory: "CloudPlatform Subcategory"
+  Resource: "CloudPlatform Resource"
+
+email:
+  enabled: true
+  smtpServer: "smtp.office365.com"
+  smtpPort: 587
+  senderEmail: "relay@coredge.io"
+  senderName: "Relay"
+  authRequired: true
+  username: "relay@coredge.io"
+  password: "V@626583763976ov"
+  smtpType: "office365"  
+
+redis:
+  host: "notification-store"
+  port: "6380"
+
+# mongodb:
+#   host: "localhost"
+#   port: "27017"
+
+# metricsdb:
+#   host: "localhost"
+#   port: "27017"

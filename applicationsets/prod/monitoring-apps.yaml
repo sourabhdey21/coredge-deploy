@@ -1,0 +1,90 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: coredge-prod-monitoring
+  namespace: argocd
+  labels:
+    customer: coredge
+    env: prod
+    category: monitoring
+spec: 
+  generators:
+    - list:
+        elements:
+          # wave 1: operator must be ready before any CRD instances
+          - app: victoriaoperator
+            wave: "1"
+          # wave 2: CRD-backed components (depend on operator)
+          - app: victoriametrics
+            wave: "2"
+          - app: victorialogs
+            wave: "2"
+          - app: vmauth
+            wave: "2"
+          - app: vmagent
+            wave: "2"
+          # wave 3: scrapers and collectors
+          - app: kube-state-metrics
+            wave: "3"
+          - app: prometheus-node-exporter
+            wave: "3"
+          - app: promtail
+            wave: "3"
+          # wave 4: UI and alerting (depend on metrics/logs being available)
+          - app: grafana
+            wave: "4"
+          - app: vmalert
+            wave: "4"
+          # Disabled — loki replaced by victorialogs
+          # - app: loki
+          #   wave: "3"
+          # Disabled — prometheus replaced by vmcluster + vmagent
+          # - app: prometheus
+          #   wave: "3"    
+  template:
+    metadata:
+      name: '{{app}}-coredge-prod'
+      namespace: argocd
+      labels:
+        customer: coredge
+        env: prod
+        category: monitoring
+        chart: '{{app}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: monitoring
+      # values repo listed first so it appears in ArgoCD UI
+      sources:
+        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+          targetRevision: main
+          ref: values
+        - repoURL: https://github.com/coredgeio/coredge-monitoring.git
+          targetRevision: main
+          path: helm/{{app}}
+          helm:
+            releaseName: '{{app}}'
+            valueFiles:
+              - $values/prod/images.yaml
+              - $values/prod/monitoring/{{app}}/values.yaml
+      # Prevent ArgoCD from fighting over immutable PVC fields on StatefulSets
+      ignoreDifferences:
+        - group: apps
+          kind: StatefulSet
+          jqPathExpressions:
+            - .spec.volumeClaimTemplates[].spec.volumeMode
+            - .spec.volumeClaimTemplates[].apiVersion
+            - .spec.volumeClaimTemplates[].kind
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true

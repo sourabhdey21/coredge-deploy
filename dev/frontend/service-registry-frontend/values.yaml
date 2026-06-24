@@ -1,0 +1,30 @@
+# service-registry-fe - dev
+
+global:
+  repository: &repository registry.coredge.io/cdc/coredgeio
+  releaseTag: &releaseTag latest
+  imagePullPolicy: &imagePolicy Always
+  dnsEnabled: &dnsEnabled false
+  externalIP: &controllerIP 172.16.108.18
+  keycloak:
+    nodePorts:
+      http: 32703
+
+replicaCount: 1
+
+oidc:
+  realm: "cloud"
+  clientId: "controller"
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 32474
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

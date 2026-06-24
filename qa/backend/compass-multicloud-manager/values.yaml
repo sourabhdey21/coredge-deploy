@@ -1,0 +1,10 @@
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  httpPort: 8080
+  grpcPort: 8090
+
+mongodb:
+  host: compass-configdb
+  port: "27017"

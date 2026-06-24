@@ -1,0 +1,23 @@
+global:
+  dbaasK8s:
+    enabled: true
+
+  redisdb:
+    host: "compass-redis"
+    port: "6379"
+    pass: ""
+    tlsEnabled: false
+
+replicaCount:
+  dbaasK8s: 1
+
+backup:
+  enabled: true
+  s3Bucket: "kubestash-backup"
+  s3Region: "us-east-1"
+  s3Endpoint: "http://172.16.105.47:30010"
+  s3AccessKeyId: "minioconsole"
+  s3SecretAccessKey: "minioconsole123"
+
+stash:
+  enabled: true

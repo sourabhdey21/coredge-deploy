@@ -1,0 +1,8 @@
+# repository-cred - airtel dev
+# copied from ccs-helm-charts
+
+repository: registry.coredge.io
+repositoryCred:
+  user: coredge_devs
+  password: eYe^9wdq^mXDWaytpp#CgEb3MJi3KJ2FgJ^W
+  mail: info@coredge.io

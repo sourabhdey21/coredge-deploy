@@ -1,0 +1,183 @@
+# Default values for gpu-paas-app
+replicaCount: 1
+
+image:
+  repository: your-registry/gpu-paas-app
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "gpu-paas-comm"
+
+environment: dev
+
+labels:
+  app: gpu-paas-app
+  environment: dev
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  # Optional: Add additional ports if needed
+  # additionalPorts:
+  #   - name: metrics
+  #     port: 9090
+  #     targetPort: 9090
+
+# Ingress configuration to expose the service externally
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: app-tls
+  #    hosts:
+  #      - app.example.com
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Node.js specific configuration
+nodejs:
+  # Environment variables for Node.js
+  env:
+    NODE_ENV: production
+    PORT: "3000"
+  # Additional custom environment variables
+  extraEnv: []
+    # - name: CUSTOM_VAR
+    #   value: "custom-value"
+    # - name: SECRET_VAR
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: my-secret
+    #       key: secret-key
+
+# Health checks
+livenessProbe:
+  enabled: false
+  httpGet:
+    path: /health
+    port: 3000
+  initialDelaySeconds: 90
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  enabled: false
+  httpGet:
+    path: /ready
+    port: 3000
+  initialDelaySeconds: 90
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+# Startup probe for slow-starting applications
+startupProbe:
+  enabled: false
+  httpGet:
+    path: /health
+    port: 3000
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 30
+  successThreshold: 1
+
+# Autoscaling
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Deployment strategy
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 25%
+
+# Reference to existing secrets and configmaps
+externalSecrets:
+  enabled: true
+  secretName: "gpu-paas-user-global-secrets"
+  configMapName: "gpu-paas-user-global-config-maps"
+
+# If you want to create secrets/configmaps locally instead of using external ones
+# set externalSecrets.enabled: false and populate these values
+configMap: {}
+
+secrets: {}
+
+# Volume mounts (if needed)
+volumes: []
+  # - name: config
+  #   configMap:
+  #     name: app-config
+
+volumeMounts: []
+  # - name: config
+  #   mountPath: /app/config
+  #   readOnly: true
+
+# Lifecycle hooks
+lifecycle: {}
+  # preStop:
+  #   exec:
+  #     command: ["/bin/sh", "-c", "sleep 15"]
+
+# Grace period for pod termination
+terminationGracePeriodSeconds: 30

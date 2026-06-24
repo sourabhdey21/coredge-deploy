@@ -1,0 +1,39 @@
+# backup-service - core42 dev
+# copied from ccs-helm-charts
+
+global:
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # this field is considered only when UseDailyBuilds is set to be false
+  # provides configuration of build tag to be used for container images
+  releaseTag: &releaseTag latest
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # Flask Config (Development OR Production)
+  # TEMPORARY
+  flaskConfig: "production"
+
+  events:
+    enabled: false
+
+
+image: "fluid_platform"
+
+nodeSelector: {} 
+
+replicaCount: 1
+
+resources: 
+  limits:
+    cpu: 400m
+    # memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
+
+enabledServices: "backup,api"
+backupProvider: "triliovault"

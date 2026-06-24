@@ -1,0 +1,37 @@
+# redis - coredge prod
+# copied from ccs-helm-charts
+
+global:
+  smtp:
+    enabled: true
+    senderEmail: "noreply@DFlare.com"
+    senderName: "DFlare Admin"
+    smtpHost: "smtp.dummy.com"
+    smtpPort: 25
+    authRequired: true
+    username: "username"
+    password: "password"
+
+
+  repository: &repository coredgeio
+
+  # storage class to use for persistent volumes, if empty fallback to
+  # default storage class
+  storageClass: &storageclass ""
+
+  notificationService:
+    enabled: false
+    enabledEmail: ""
+    enabledSms: ""
+
+
+notificationStore:
+  persistence:
+    size: 1Gi
+
+notificationService:
+  replicaCount: 1
+  image: "fluid_notification"
+  sms:
+    sender: ''
+    apiKey: ''

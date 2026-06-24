@@ -1,0 +1,128 @@
+# core-mgmt-service - coredge demo
+# copied from ccs-helm-charts
+
+global:
+  # indicates usage of external ingress, currently also acts as a
+  # switch to indicate use of domain configuration
+  dnsEnabled: &dnsEnabled false
+
+  # Ingress claas to be defined to Ingress configuration 
+  ingressClass: &ingressClass ""
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # this field is considered only when UseDailyBuilds is set to be false
+  # provides configuration of build tag to be used for container images
+  releaseTag: &releaseTag latest
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # external IP for controller, relevant, when domain is not
+  # configured to allow generation of server certificate validity using
+  # this IP address
+  externalIP: &controllerIP 127.0.0.1
+
+  # Flask Config (Development OR Production)
+  # TEMPORARY
+  flaskConfig: "production"
+
+  events:
+    enabled: false
+
+
+  customer:
+    tenant: "coredge-cloud"
+
+  #Set this to true for environments without internet and update the proxy details
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    no_proxy: "localhost,127.0.0.1,cluster.local,.svc,.svc.cluster.local"
+
+  # user credentials for the default realm user that will be created
+  # along with creation of the realm
+  admin:
+    username: &adminUsername "ccsadmin"
+    password: &adminUserPass "Welcome@123"
+    firstname: &adminFirstname "CCS"
+    lastname: &adminLastname "Admin"
+    email: &adminUserEmail "info@coredge.io"
+
+  certificatesManager:
+    enabled: false
+
+  autoscalingService:
+    enabled: false
+
+  notificationService:
+    enabled: false
+    enabledEmail: ""
+    enabledSms: ""
+
+  # to enable and configure metering module for the platform that
+  # allows capability for metering the resource usage
+  # this needs to be always enabled as this microservice will be a
+  # mandatory module offering license based functionality
+  metering:
+    enabled: true
+
+
+  backupService:
+    enabled: false
+
+
+  # Default application type: "ccp"
+  application: "ccp"
+  projectLabel: "" # value could be "Cell" in Airtel otherwise is null
+
+  cmdb:
+    enabled: false
+
+  #Provider configuration settings
+  provider:
+    singleRegionSingleProvider: true
+    singleRegionSingleProviderPerAz: false
+    supportProviderIdInHeader: false
+    SingleRegionSingleProviderWithMultiConsoleAZ: true
+  
+  orbiterQuotaEnabled: true
+
+nodeSelector: {} 
+
+replicaCount: 1
+
+image: "fluid_platform"
+
+resources: 
+  limits:
+    cpu: 400m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
+
+celery:
+  enabled: true
+  replicaCount: 1
+  command: "celery -A app  worker --concurrency=2 --loglevel=debug"
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 6Gi
+    requests:
+      cpu: 100m
+      memory: 2Gi
+
+enabledServices: "core_mgmt,api"
+
+# HPA configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

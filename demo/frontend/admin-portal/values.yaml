@@ -1,0 +1,191 @@
+# admin-portal - coredge demo
+# copied from ccs-helm-charts
+
+global:
+  # indicates enabling use of DNS hostnames via Ingress
+  # switch to indicate use of domain configuration
+  dnsEnabled: &dnsEnabled true
+
+  # Type to expose UI services with
+  # Supported: ingress / loadbalancer
+  serviceExposure:
+    type: "ingress"
+
+  # Ingress claas to be defined to inngress configuration when using Ingress controller
+  # Only used when supports Nginx Ingress Controller
+  # Only used when global.serviceExposure.type==ingress
+  ingressClass: &ingressClass "nginx"
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # this field is considered only when UseDailyBuilds is set to be false
+  # provides configuration of build tag to be used for container images
+  releaseTag: &releaseTag latest
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # external IP for controller, relevant, when domain is not
+  # configured to allow generation of server certificate validity using
+  # this IP address
+  externalIP: &controllerIP 172.16.108.72
+
+  # Flask Config (Development OR Production)
+  # TEMPORARY
+  flaskConfig: "production"
+
+  # keycloak realm to be used as the root
+  rootRealm: &rootRealm "cloud"
+
+  ## Keycloak Architecture override to enable HA or standalone
+  keycloak:
+    domain: &keycloakDomain "admin.coredge.internal"
+    nodePorts:
+      http: &keycloakNodePortHTTP "32705"
+      https: &keycloakNodePortHTTPS "32706"
+
+  # Default application type: "ccp"
+  application: "ccp"
+  projectLabel: "" # value could be "Cell" in Airtel otherwise is null
+
+  events:
+    enabled: false
+  
+    # CMP portal, to create service request eg: JIRA, serviceNow
+  orbiterTicketingService:
+    enabled: true
+
+  gpuPaasUser:
+    enabled: true    
+  ## NEED  TO CHECK WITH RAKESH ONCE THAT HELPER FILE IS REQUIRED OR NOT
+  ## Override for PostgresDB architecture
+  ## global.postgresql.architecture.standalone Set to 'false' deploys a postgresql as a cluster with High Availability
+  ## global.postgresql.architecture.standalone Set to 'true' deploys postgresql in standalone mode with no High Availability
+#  postgresql:
+#    architecture:
+#      standalone: false
+#    ### Config overrride to use external Postgres
+#    ### This will not deploy postgresql with ccp
+#    external:
+#      host: ""
+#      port: ""
+#      user: ""
+#      database: ""
+#      password: ""
+
+#  mongodb:
+#    external:
+#      enabled: false
+#      configdb:
+#        host: ""
+#        port: ""
+#        user: ""
+#        pass: ""
+#      metricsdb:
+#        host: ""
+#        port: ""
+#        user: ""
+#        pass: ""
+#    globaldb:
+#      host: ""
+#      port: ""
+#      user: ""
+#      pass: ""
+
+  ## Config override for AuditDB Postgres server details
+#  auditdb:
+#    host: ''
+#    port: ''
+#    database: ''
+#    username: ''
+#    password: ''
+#
+#  redisdb:
+#    host: ""
+#    port: ""
+#    pass: ""
+#    tlsEnabled: false
+
+  #Set this to true for environments without internet and update the proxy details
+#  proxy:
+#    enabled: false
+#    http_proxy: ""
+#    https_proxy: ""
+#    no_proxy: "localhost,127.0.0.1,cluster.local,.svc,.svc.cluster.local"
+
+  ## Configuration for exposing frontend URLs
+  ## DNS hostnames considered only when global.dnsEnabled is 'true'
+  ## Othwerwise NodePorts considered
+  frontend:
+    admin:
+      domain: &adminDomain "admin.coredge.internal"
+      tlsSecret: &adminTls "coredge-tls"
+    userPortal:
+      domain: &userDomain "console.coredge.io"
+      tlsSecret: &userTls "coredgeio-tls"
+      nodePort: &frontendNodePort "32500"
+
+
+nodeSelector: {} 
+
+replicaCount: 1
+
+regionCode: "UAE"
+
+allowedAdminUserDomain: ""
+
+adminportal:
+  image: "fluid-admin"
+  service:
+    nodePort: "32600"
+  resources: 
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  ## Only use when https.enabled is set true
+  ## Else leave empty
+  ingress:
+    tlsSecret: "coredge-tls"
+    hostname: "admin.coredge.internal"
+  ## Monitoring URLs
+  monitoringURL: 
+    resource: ""
+    projectResource: ""
+  ## Management URLs
+  managementURL: 
+    resource: ""
+  ## Enabled Services
+  enabledServices: "signup-approval,scheduler,k8s-os-config,support-ticket,kyc,kyb,admin-access-logs,admin-action-logs,admin-user,all-user,autoscaling-group,availability-zone,block-storage,compute,compute-availability-zone,compute-snapshot,file-storage,firewall,flavors,flavor-group,images,network,network-availability-zone,object-storage-provider,organisation,project,provider,provider-cluster,default-rule,public-ip,resource-management,resource-metrics,resource-monitoring,security-group,security-group-rule,subnets,ssl-certificate,user-access-logs,user-action-logs,volume-type,volume-availability-zone,volume-snapshot,quota-request,quota-list,backup-provider,storage-provider,default-quota,region,quota-utilization,organisation-firewall,object-storage,service-catalog,waap,quota-package,esg,dns,monitoring,kyc,kyb,kubedb,backporting,ckp-cluster,cluster"
+
+#adminPlatform:
+#  image: "fluid_admin_platform"
+#  resources: 
+#    limits:
+#      cpu: 500m
+#      # memory: 128Mi
+#    requests:
+#      cpu: 100m
+#      memory: 200Mi
+#  celery:
+#    enabled: true
+#    replicaCount: 1
+#    command: "celery -A app.celery worker --loglevel=INFO -B"
+#    resources: 
+#      limits:
+#        cpu: 1000m
+#        memory: 6Gi
+#      requests:
+#        cpu: 100m
+#        memory: 2Gi
+ # HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80 

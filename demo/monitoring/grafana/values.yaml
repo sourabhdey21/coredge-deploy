@@ -1,0 +1,262 @@
+global:
+  repository: "docker.io/coredgeio"
+  grafana:
+    enabled: true
+    postgresql:
+      enabled: true
+      highAvailability: true
+
+  ## Enable VMCluster datasource + dashboards
+  victoriametrics:
+    enabled: true
+
+  ## Enable Prometheus NodeExporter dashboards
+  prometheusNodeExporter:
+    enabled: true
+
+  ## Enable Promtail-related dashboards (log pipeline)
+  promtail:
+    enabled: true
+
+  ## Enable Prometheus datasource (disabled — replaced by VMCluster)
+  prometheus:
+    enabled: false
+
+  ## Enable VictoriaLogs datasource + dashboards
+  victoriaLogs:
+    enabled: true
+
+  ## Route datasource URLs through VMAuth proxy
+  ## Service: vmauth-vmauth:8427   NodePort: 30427
+  vmauth:
+    enabled: true
+
+  ## Enable Loki datasource (disabled — using VictoriaLogs instead)
+  loki:
+    enabled: false
+    retentionPeriod: "168h"
+    retentionDeletesEnabled: true
+
+  ## Enable various Dashboards -- TODO Needs rework
+  ### Kubernetes Monitoring
+  kubernetesMonitoring:
+    general:
+      enabled: true
+    cni:
+      calico: true
+      cilium: false
+    ingressController:
+      nginx: false
+    rookCeph: false
+
+  ## Enable dashboards for Database monitoring
+  ## Supported - postgresql, mongodb and mysql
+  databaseMonitoring:
+    postgresql: false
+    mongo: false
+    mysql: false
+
+  ## Enable Dashboard for GPU Operator Monitoring
+  gpuOperator:   
+    nvidia: false
+
+  ## enable gpu's monitoring (nvidia and amd)
+  gpuMonitoring:
+    amd: false
+    nvidia: false
+
+  ## fluid console, admin portal along with grafana monitoring
+  fluidMonitoring:
+    enabled: false
+
+  ## CCP (Coredge Cloud Platform) dashboards
+  ccpMonitoring:
+    enabled: false
+
+  ## Cloud dashboards
+  cloudMonitoring:
+    enabled: false
+
+fullnameOverride: "grafana"
+
+namespaceOverride: ""
+
+serviceMonitor:
+  enabled: false
+
+tls:
+  enabled: false
+  secretName: grafana-tls
+  domain: grafana.coredge.io
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations: {}
+  labels: {}
+  path: /
+  pathType: Prefix
+  hosts:
+    - grafana.coredge.internal
+  extraPaths: []
+  tls:
+    - secretName: coredge-tls
+      hosts:
+        - grafana.coredge.internal
+
+resources:
+  limits:
+      cpu: 2
+      memory: 4Gi
+  requests:
+      cpu: 500m
+      memory: 1Gi
+
+persistence:
+  type: pvc
+  enabled: true
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  finalizers:
+    - kubernetes.io/pvc-protection
+  extraPvcLabels: {}
+  annotations: {}
+  selectorLabels: {}
+  storageClassName: ""
+  subPath: ""
+  existingClaim: ""
+  inMemory:
+    enabled: false
+    sizeLimit: ""
+
+initChownData:
+  enabled: false
+  image:
+    repository: docker.io/coredgeio/busybox
+    tag: "1.31.1"
+    sha: ""
+    pullPolicy: IfNotPresent
+  resources: {}
+  securityContext:
+    runAsNonRoot: false
+    runAsUser: 0
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      add:
+        - CHOWN
+
+adminUser: admin
+adminPassword: Welcome@123
+
+admin:
+  existingSecret: ""
+  userKey: admin-user
+  passwordKey: admin-password
+
+env: {}
+
+envValueFrom: {}
+
+envFromSecret: ""
+
+envRenderSecret: {}
+
+envFromSecrets: []
+
+envFromConfigMaps:
+  - name: grafana-extra-env
+
+enableServiceLinks: true
+
+extraSecretMounts: []
+
+extraVolumeMounts: []
+
+lifecycleHooks: {}
+
+plugins:
+  - victoriametrics-logs-datasource
+
+datasources: {}
+
+alerting: {}
+
+notifiers: {}
+
+dashboardProviders: {}
+
+dashboards: {}
+
+grafana.ini:
+  paths:
+    data: /var/lib/grafana/
+    logs: /var/log/grafana
+    plugins: /var/lib/grafana/plugins
+    provisioning: /etc/grafana/provisioning
+  analytics:
+    check_for_updates: true
+  log:
+    mode: console
+  grafana_net:
+    url: https://grafana.net
+  server:
+    domain: "{{ if (and .Values.ingress.enabled .Values.ingress.hosts) }}{{ .Values.ingress.hosts | first }}{{ else }}''{{ end }}"
+
+sidecar:
+  image:
+    repository: docker.io/coredgeio/k8s-sidecar
+    tag: "1.26.0"
+    sha: ""
+  imagePullPolicy: IfNotPresent
+  resources: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    seccompProfile:
+      type: RuntimeDefault
+  enableUniqueFilenames: false
+  readinessProbe: {}
+  livenessProbe: {}
+
+revisionHistoryLimit: 20
+
+# === PostgreSQL (Zalando HA / standalone) ===
+postgresql:
+  standalone:
+    image: postgres:15.7
+    resources:
+      limits:
+        memory: 1Gi
+        cpu: 500m
+      requests:
+        memory: 256Mi
+        cpu: 100m
+    persistence:
+      size: 20Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+  ha:
+    image: docker.io/coredgeio/spilo-16:3.2-p3
+    pgVersion: '15'
+    maxconnections: "300"
+    replicaCount: '3'
+    loadBalancer:
+      master: false
+      replica: false
+    volume:
+      size: 20Gi
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        cpu: 500m
+        memory: 500Mi
+    pg_hba: []
+    monitoring:
+      enabled: false

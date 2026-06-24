@@ -1,0 +1,85 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  labels:
+    category: backend
+    customer: coredge
+    env: qa
+  name: coredge-qa-backend
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - app: admin-platform-celery
+      - app: admin-platform
+      #- app: archival-storage
+      - app: auth-service
+      - app: autoscaling
+      - app: backup-service
+      - app: baremetal-manager
+      - app: ccp-extension
+      #- app: certificates-manager
+      - app: cloud-manager
+      - app: compass-api
+      - app: compass-cluster-manager
+      - app: compass-controller
+      - app: compass-image-scanner
+      - app: compass-metric-server
+      - app: compass-multicloud-manager
+      - app: compass-multicloud-migration
+      - app: compass-orchestrator
+      - app: compass-term
+      - app: compute-service
+      - app: container-registry
+      - app: core-mgmt-service
+      - app: fluid-monitoring-service
+      - app: helper
+      - app: kg-cluster-notifier
+      - app: metering
+      - app: network-manager
+      - app: neutron-service
+      #- app: notification-service
+      - app: orbiter-ticketing-service
+      - app: gpu-paas-user
+      - app: gpu-paas-comm
+      - app: sockets-server
+      - app: storage-plugin
+      - app: tenant-management-service
+      - app: vmconsole
+      - app: volume-service
+      - app: workflow-manager
+      - app: dbaas-k8s      
+  template:
+    metadata:
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+      labels:
+        category: backend
+        customer: coredge
+        env: qa
+      name: '{{app}}-coredge-qa'
+      namespace: argocd
+    spec:
+      destination:
+        namespace: coredge-qa
+        server: https://kubernetes.default.svc
+      project: default
+      sources:
+      - ref: values
+        repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+        targetRevision: main
+      - helm:
+          valueFiles:
+          - $values/qa/images.yaml
+          - $values/qa/backend/{{app}}/values.yaml
+        path: helm/backend-charts/{{app}}
+        repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+        targetRevision: main
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true

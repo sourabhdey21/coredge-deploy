@@ -1,0 +1,31 @@
+# compass-cluster-manager - core42 dev
+# copied from ccs-helm-charts
+
+replicaCount:
+  clusterManager: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+  UseDailyBuilds: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+    globaldb:
+      host: ""
+
+betaFeatures:
+  enabled: true
+
+clusterManager:
+  enabled: true
+  sandboxImage: pause:3.9
+  hostProvisionerConfig:
+    osImages:
+      - name: ""
+  externalClusterReference:
+    kubeconfigSecretName: ""

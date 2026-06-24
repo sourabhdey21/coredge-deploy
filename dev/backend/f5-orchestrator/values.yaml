@@ -1,0 +1,18 @@
+global:
+  repository: coredgeio
+  releaseTag: latest
+  imagePullPolicy: Always
+
+replicaCount: 1
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
+
+service:
+  type: NodePort
+  port: 8000

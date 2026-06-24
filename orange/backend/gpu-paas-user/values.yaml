@@ -1,0 +1,128 @@
+# Default values for gpu-paas-user
+replicaCount: 1
+
+image:
+  # repository: docker.io/akashsharma2401/user-service
+  # repository: coredgeio/gpu-paas-user
+  repository: aashishsingune/gpu-paas-user
+  pullPolicy: Always
+  # tag: "update-create-tenant-2"
+  # tag: "latest"
+  tag: email-temp-v1
+
+nameOverride: ""
+fullnameOverride: "gpu-paas-user"
+
+environment: dev
+
+labels:
+  app: gpu-paas-user
+  environment: dev
+
+deployment:
+  progressDeadlineSeconds: 60
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+service:
+  type: NodePort
+  ports:
+    - name: default
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+    - name: grpc
+      port: 3001
+      targetPort: 3001
+      protocol: TCP
+    - name: listen
+      port: 80
+      targetPort: 8000
+      protocol: TCP
+
+container:
+  ports:
+    - containerPort: 3000
+      protocol: TCP
+  resources: {}
+  terminationMessagePath: /dev/termination-log
+  terminationMessagePolicy: File
+
+pod:
+  automountServiceAccountToken: false
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  terminationGracePeriodSeconds: 30
+
+# ConfigMap values
+configMap:
+  user_app_env: "development"
+  user_host_grpc: "dev-gpu-paas-user-service"
+  user_log_level: "debug"
+  user_new_relic_app_name: "dev-gpu-paas-user"
+  user_node_env: "development"
+  user_svc_url: "http://gpu-paas-user.orange-dev:80"
+  redis_base_url: ""
+  zapier_sales_url: ""
+  zapier_email_subscription_url: ""
+  zapier_email_unsubscribe_url: ""
+  comm_node_env: "development"
+  billing_app_env: "development"
+  shufti_callback_url: ""
+  billing_new_relic_app_name: "dev-gpu-paas-billing"
+  billing_svc_url: "http://gpu-paas-billing.orange-dev:80"
+  billing_host_grpc: "dev-gpu-paas-billing-service"
+  bridge_tower_admin_base_url: ""
+  bridge_tower_base_url: ""
+  payment_method_save_redirect_url: ""
+  cloudinary_cloud_name: ""
+  cloudinary_api_key: ""
+  cloudinary_api_secret: ""
+  ond_service_url: "http://on-demand-services.orange-dev:80"
+  gpu_paas_landing_url: ""
+  platform_link: "https://console-orange.coredge.io"
+  realtime_app_env: "development"
+  realtime_log_level: "debug"
+  realtime_new_relic_app_name: "dev-gpu-paas-realtime"
+  scheduler_app_env: "development"
+  scheduler_new_relic_app_name: "dev-gpu-paas-scheduler"
+  communication_new_relic_app_name: "dev-gpu-paas-communication"
+
+# Secret values (these should be overridden in production)
+secrets:
+  coredge_admin_url: "http://admin-portal"
+  coredge_keycloak_url: "http://keycloak"
+  coredge_admin_password: "Welcome@123"
+  coredge_admin_user: "ccsadmin"
+  shufti_client_secret: ""
+  shufti_url: ""
+  shufti_client_id: ""
+  user_mongodb_uri: mongodb://sigma:pass@compass-configdb.orange-dev:27017/sigma_db?authSource=admin
+  new_relic_license_key: ""
+  redis_full_url: "redis://notification-store:6380"
+  hcaptcha_secret_key: ""
+  comm_mongodb_uri: "mongodb://sigma:pass@compass-configdb.orange-dev:27017/sigma_db?replicaSet=rs0&authSource=admin"
+  resource_hierarchy: "organization"
+  s3_type: "minio"
+  s3_enabled: "false"
+  s3_endpoint: "minio.uhc-dev.svc.cluster.local:9000"
+  s3_access_key: "minioadmin"
+  s3_secret_key: "minioadmin"
+  s3_bucket: "documents"
+  s3_use_ssl: "false"
+  smtp_port: "587"
+  smtp_host: "smtp.gmail.com"
+  smtp_starttls: "true"
+  smtp_user: "mahima.dev.cloud@gmail.com"
+  smtp_pass: "gfjhybqlwftomskc"
+  smtp_from: "mahima.dev.cloud@gmail.com"
+  smtp_display_from: "Mahima Garg <mahima.dev.cloud@gmail.com>"
+  email_provider: "SMTP"
+  require_admin_approval: "true"
+  password_encryption_key: "3a7f9c2e1b4d6f8a0e2c4b5d7a9f1e3c"

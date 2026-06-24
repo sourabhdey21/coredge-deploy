@@ -1,0 +1,293 @@
+# auth-service - airtel dev
+# copied from ccs-helm-charts
+
+replicaCount:
+  orbiterAuth: 1
+
+global:
+  # deployment environment indication for deployer to enable relevant
+  # environment specific configuration, currentely only environment
+  # supported is AWS
+  # default value is empty string indicating no special requirements
+  # for the environment
+  smtp:
+    enabled: true
+    senderEmail: "noreply@DFlare.com"
+    senderName: "DFlare Admin"
+    smtpHost: "smtp.dummy.com"
+    smtpPort: 25
+    authRequired: true
+    username: "username"
+    password: "password"
+
+  # Global flag to indicate use of domain configuration throughout the application
+  dnsEnabled: &dnsEnabled false
+
+  externalIP: &controllerIP 127.0.0.1
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  tenantManagement:
+    # allow tenant management, providing capability to create multiple
+    # tenants enabling multi-tenancy
+    enabled: false
+    # configure if registeration process is enabled and SMTP configuration
+    # to be used for triggering emails to complete the overall flow
+    # enabling email verifications and welcome emails
+    register:
+      enabled: false
+
+  airtelPlugin:
+    enabled: true
+
+  containerRegistry:
+    enabled: false
+
+  baremetalManager:
+    enabled: false
+
+  storagePlugin:
+    enabled: false
+
+  networkManager:
+    enabled: true
+
+  metering:
+    enabled: true
+
+  tcpwaveExtension:
+    enabled: false
+
+  securityPlugin:
+    enabled: false
+
+  # 
+  aiOrchestrator:
+    enabled: false
+
+  # CMP portal, to create service request eg: JIRA, serviceNow
+  orbiterTicketingService:
+    enabled: false
+
+
+  ## Configuration for exposing frontend URLs
+  ## DNS hostnames considered only when global.dnsEnabled is 'true'
+  ## Othwerwise NodePorts considered
+  frontend:
+    admin:
+      domain: &adminDomain ""
+      tlsSecret: &adminTls ""
+    userPortal:
+      domain: &userDomain ""
+      tlsSecret: &userTls ""
+      nodePort: &frontendNodePort "32500"
+    vmconsole:
+      domain: &vmconsoleDomain ""
+      tlsSecret: &vmconsoleTls ""
+      nodePort: &vmconsoleNodePort "32700"
+    # For Production environment we require kyc status validation
+    # However, for dev and test environments we should be able to skip
+    # these validations
+    # Setting skipKyc true will bypass this validation
+    # Note: This configuration should not be used for Production env
+    skipKyc: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+  redisdb:
+    host: "notification-store.orange-dev"
+    port: 6380
+    pass: ""
+    tlsEnabled: false
+
+  openfga:
+    enabled: true
+    endpoint: "http://openfga:8080"
+    storeId: 01KFAZHXFKB2041AJPHSEXYQ5G
+    apiToken: MYPreSharedToken1
+    authModel: resourceModel
+    modelProfile: domain-hierarchy
+
+  # enable loading default repositories for better user experience with
+  # preconfigured helm repositories
+  defaultRepos:
+    enabled: true
+
+  preOnboardedTenant:
+    enabled: true
+    name: "orange"
+    admin:
+      firstname: "orange"
+      lastname: "dev"
+      email: "dev@orange.in"
+      username: "devadmin"
+      password: "devadmin"
+
+  # this configuration is used for integrating geolocation component
+  # with compass, the geolocation component is used for all location
+  # services like conversion between coordinates and geolocation &
+  # conversion from IP to location, the geolocation component exposes its
+  # functionality via gRPC services so compass requires this config info
+  # to connect with the geolocation component, currently we DO NOT support
+  # encrypted connections using certificates or any other mechanism
+  # hence it is expected that the geolocation component reside
+  # within the same cluster as the compass deployment
+  geolocation:
+    # grpc host name used to connect with geolocation component
+    # if deployed within the same cluster as compass, this will be
+    # of the form: <svc>.<namespace>
+    host: ""
+    # grpc port used to connect with geolocation component
+    # if deployed within the same cluster as compass, this will be
+    # geolocation component's svc port
+    port: ""
+
+
+resourceAlias:
+  - name: domain
+    alias: domain
+  - name: project
+    alias: project
+  - name: computes
+    alias: computes
+  - name: file-storage
+    alias: file-storage
+
+roleNameAlias:
+  domain:
+    - name: admin
+      alias: admin
+    - name: manager
+      alias: manager
+    - name: member
+      alias: member
+  project:
+    - name: admin
+      alias: admin
+    - name: manager
+      alias: manager
+    - name: member
+      alias: member
+
+keycloak:
+  # keycloak clientID (needs to be a public client)
+  clientId: controller
+  # loginTheme for the keycloak
+  defaultLoginTheme: ""
+  # accountTheme for the keycloak
+  defaultAccountTheme: ""
+  # adminTheme for the keycloak
+  defaultAdminTheme: ""
+  # emailTheme for the keycloak
+  defaultEmailTheme: ""
+  # setupKeycloakConfidentialClient indicates whether to set up a confidential client
+  setupKeycloakConfidentialClient: false
+  # enable2FA indicates whether to enable two-factor authentication
+  enable2FA: false
+  # introspection client credentials
+  introspect:
+    clientId: ""
+    clientSecret: ""
+  # keycloak URL used in OIDC for fetching well-known config
+  url: https://keycloak:8443
+  # list of public clients that need to be created at deploy time
+  clients:
+  - controller
+  # name of the realm that needs to be created at deploy time
+  realm: "cloud"
+  # DNS for the origin that we want to allow when accessing the client
+  dns: ""
+  # user credentials for the default realm user that will be created
+  # along with creation of the realm
+  admin:
+    username: &adminUsername "ccsadmin"
+    password: &adminUserPass "Welcome@123"
+    firstname: &adminFirstname "CCS"
+    lastname: &adminLastname "Admin"
+    email: &adminUserEmail "info@coredge.io"
+  # IDP config for the IDP that needs to be created
+  # at deploy time in the realm created at deploy time
+  idpConfig:
+    enabled: false
+    name: ""
+    # auto onboarding allows users to directly use the IDP and create a new account
+    # instead of requiring the user to exist in the system beforehand
+    allowAutoOnboarding: true
+    # provider ID can either be OIDC or of type facebook, microsoft, google etc.
+    providerId: "oidc"
+    clientId: ""
+    clientSecret: ""
+    clientAuthMethod: ""
+    authorizationUrl: ""
+    tokenUrl: ""
+  # enable below section while having the need to work with multiple
+  # redirect uris and web origins
+  # usually this case is more relevant while having the need to work
+  # with different dns for auth, regular portal and admin portal
+  # or even if a different tenat url is needed
+  redirectURIs:
+  - "*"
+  #
+  # always used in conjection with redirectURIs config
+  webOriginsURIs:
+  - "*"
+
+gateway:
+  # additional enpoint forwarding configuration
+  #locations:
+  #- prefix: /api/demo
+  #  endpoint: http://cloud-manager:8080
+  #  rewritePrefix: /
+  #  accessType: unscoped
+  locations:
+  - prefix: /api/auth-service/v1/auth/login-method
+    endpoint: http://orbiter-auth:8080
+    accessType: public
+    consumeLocally: true
+  # enable/disable payment method availability check in gateway server
+  payment:
+    enabled: false
+
+limits:
+  events:
+    maxSize: 1000000 # max memory allowed to be used in bytes for events per domain
+    maxEntries: 5000 # max number of entries allowed to be used for events per domain
+  accesslogs:
+    maxSize: 1000000 # max memory allowed to be used in bytes for events per domain
+    maxEntries: 5000 # max number of entries allowed to be used for events per domain
+  gateway:
+    rateLimit: 200
+    burstSize: 500
+    
+redisdb:
+  host: "compass-redis"     
+  port: "6379"
+  pass: ""                
+  tlsEnabled: false
+
+email:
+  enabled: true
+  userAddTemplateId: 105
+  platformLink: "https://console-orange.coredge.io"

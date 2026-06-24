@@ -1,0 +1,21 @@
+# Set to false to disable the migration Job entirely (no resources will be created).
+enabled: false
+
+replicaCount: 1
+
+mongodb:
+  host: compass-configdb
+  port: "27017"
+  # Secret must have keys: username, password
+  secretName: configdb-secret
+
+encryptionKey:
+  secretName: provider-encryption-key
+  value: your-fernet-key
+
+postgres:
+  # Secret must have keys: DB_HOST, DB_PORT, POSTGRES_USER, POSTGRES_PASSWORD
+  secretName: ccs-postgres-config
+  # Override the target database name if it differs from the default.
+  database: cloud
+

@@ -1,0 +1,122 @@
+# openfga - airtel dev
+# copied from ccs-helm-charts
+
+global:
+  repository: &repository coredgeio
+  imagePullPolicy: &imagePolicy Always
+  imagePullSecrets: []
+  storageClass: &storageclass ""
+
+image: 'openfga:v1.11'
+
+replicaCount: 1
+
+service:
+  type: NodePort
+
+resources: 
+  limits:
+    cpu: 1
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 500Mi
+
+nodeSelector: {}
+
+playground:
+  enabled: true
+  port: 3000
+
+metrics: 
+  enabled: true 
+  port: 2112 
+
+authn:
+  method:
+  preshared:
+    keys: "MYPreSharedToken1"      
+
+postgresqlOverride:
+  enabled: false
+  host: ""
+  port: ""
+  user: ""
+  pass: ""
+  db: ""
+
+## Postgresql Configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: password
+    database: postgres
+  image: postgres:15.7
+  service:
+    type: ClusterIP
+  resources:
+    limits: 
+      memory: 1Gi
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 100m
+  persistence:
+    size: 2Gi
+    accessModes:
+      - ReadWriteOnce
+  
+migrate:
+  extraVolumes: []
+  extraVolumeMounts: []
+  extraInitContainers: []
+  sidecars: []
+  annotations:
+    helm.sh/hook: "post-install,post-upgrade,post-rollback,post-delete"
+    helm.sh/hook-weight: "-5"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "0"      
+  labels: {}
+  timeout:
+
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook: PreSync      
+  name: ""
+
+
+datastore:
+  metrics:
+    enabled: false
+  engine: postgres
+  uri: "postgres://postgres:password@openfga-postgresql:5432/postgres?sslmode=disable"    
+  uriSecret:
+  username:
+  password:
+  existingSecret:
+  secretKeys:
+    uriKey:
+    usernameKey:
+    passwordKey:
+  maxCacheSize:
+  maxOpenConns:
+  maxIdleConns:
+  connMaxIdleTime:
+  connMaxLifetime:
+  applyMigrations: true
+  waitForMigrations: true
+  migrationType: job
+  migrations:
+    resources: {}
+    image:
+      repository: groundnuty/k8s-wait-for
+      pullPolicy: Always
+      tag: "v2.0"
+

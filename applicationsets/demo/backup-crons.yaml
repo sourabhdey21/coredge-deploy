@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: backup-crons-demo
+  namespace: argocd
+  labels:
+    customer: ccs
+    env: demo
+    category: backup-crons
+spec:
+  generators:
+    - list:
+        elements:
+          - app: keycloak-postgres
+          - app: ccs-postgres
+          - app: mongodb
+          - app: openfga
+          - app: etcd
+  template:
+    metadata:
+      name: '{{app}}-backup-cron-demo'
+      namespace: argocd
+      labels:
+        customer: ccs
+        env: demo
+        category: backup-crons
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: ce-demo
+      sources:
+        # 1) values repo
+        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+          targetRevision: main
+          ref: values
+        # 2) helm charts repo
+        - repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+          targetRevision: main
+          path: helm/backup-crons/{{app}}
+          helm:
+            valueFiles:
+              - $values/demo/backup-crons/{{app}}/values.yaml
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

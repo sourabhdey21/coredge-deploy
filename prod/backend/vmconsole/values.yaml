@@ -1,0 +1,92 @@
+# vmconsole - coredge prod
+# copied from ccs-helm-charts
+
+global:
+  imageRegistry: ""
+  repository: &repository coredgeio
+  releaseTag: &releaseTag ""
+  imagePullPolicy: &imagePolicy Always
+  imagePullSecrets: []
+
+
+  # indicates enabling use of DNS hostnames via Ingress
+  # switch to indicate use of domain configuration
+  dnsEnabled: &dnsEnabled true
+
+  # Type to expose UI services with
+  # Supported: ingress / loadbalancer
+  serviceExposure:
+    type: "nodeport"
+
+  # Ingress claas to be defined to inngress configuration when using Ingress controller
+  # Only used when supports Nginx Ingress Controller
+  # Only used when global.serviceExposure.type==ingress
+  ingressClass: &ingressClass "nginx"
+  
+  ## Configuration for exposing frontend URLs
+  ## DNS hostnames considered only when global.dnsEnabled is 'true'
+  ## Othwerwise NodePorts considered
+  frontend:
+    vmconsole:
+      domain: &vmconsoleDomain "vm-console.coredge.io"
+      tlsSecret: &vmconsoleTls "coredgeio-tls"
+      nodePort: &vmconsoleNodePort "32700"
+
+## Openstack version (mandatory)
+## If >= 18, websockify proxy routes are not generated
+openstackVersion: 17
+      
+## Openstack Cloud Provider Details (Support Multi AZ)
+cloudProviders:
+   - name: "nova"
+     protocol: 'https'
+     host: "10.10.20.100"
+     port: "6080"
+   - name: "test-az"
+     protocol: 'https'
+     host: "10.10.20.100"
+     port: "6080"
+  # - name: "az2"
+  #   protocol: 'https'
+  #   host: "" 
+  #   port: ""
+  #   sniProxy: true
+  # - name: "az1"
+  #   protocol: 'https'
+  #   host: "" 
+  #   port: ""
+  #   sniProxy: true
+  # - name: "az3"
+  #   protocol: 'https'
+  #   host: "" 
+  #   port: ""
+  #   sniProxy: true
+
+replicaCount: "1"
+
+image: nginx:latest
+
+service:
+  nodePort: "32700"
+
+resources: 
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+ingress:
+  tlsSecret: "coredgeio-tls"
+  hostname: "vm-console.coredge.io"
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

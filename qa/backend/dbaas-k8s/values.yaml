@@ -1,0 +1,26 @@
+global:
+  dbaasK8s:
+    enabled: true  # Add this section
+
+  replicaCount:
+    dbaasK8s: 1
+
+  # Redis configuration (uses global if available)
+  redisdb:
+    host: "compass-redis"
+    port: "6379"
+    pass: ""
+    tlsEnabled: false
+
+  # Backup configuration
+  backup:
+    enabled: false
+    s3Bucket: ""
+    s3Region: ""
+    s3Endpoint: ""
+    s3AccessKeyId: ""
+    s3SecretAccessKey: ""
+
+  # Stash configuration
+  stash:
+    enabled: true

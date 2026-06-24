@@ -1,0 +1,99 @@
+# ==============================================
+# core-mgmt-service - airtel dev environment
+# ==============================================
+# Copied from: ccs-helm-charts/helm/backend-charts/core-mgmt-service/values.yaml
+# Branch:  core-infra-charts
+#
+# Modify values below for customer-specific overrides
+# Global images are defined in dev/images.yaml
+# ==============================================
+
+global:
+  # indicates usage of external ingress, currently also acts as a
+  # switch to indicate use of domain configuration
+  dnsEnabled: &dnsEnabled false
+
+  # Ingress claas to be defined to Ingress configuration 
+  ingressClass: &ingressClass ""
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # this field is considered only when UseDailyBuilds is set to be false
+  # provides configuration of build tag to be used for container images
+  releaseTag: &releaseTag latest
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # external IP for controller, relevant, when domain is not
+  # configured to allow generation of server certificate validity using
+  # this IP address
+  externalIP: &controllerIP 127.0.0.1
+
+  # Flask Config (Development OR Production)
+  # TEMPORARY
+  flaskConfig: "production"
+
+  events:
+    enabled: false
+
+  #Set this to true for environments without internet and update the proxy details
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    no_proxy: "localhost,127.0.0.1,cluster.local,.svc,.svc.cluster.local"
+
+  admin: 
+    username: "admin"                    # Change this
+    password: "changeme123" # ⚠️ Use a strong password
+    firstname:  "Admin"
+    lastname: "User"
+    email:  "admin@airtel.com"           # Change to actual email
+  
+  certificatesManager:
+    enabled: false
+  autoscalingService:
+    enabled: false
+  notificationService:
+    enabled: false
+    enabledEmail: false
+    enabledSms: false
+  metering:
+    enabled: false
+  backupService:
+    enabled: false
+  regionNames: "default-region"
+  application: "acp"
+  cmdb:
+    enabled: false 
+
+nodeSelector: {} 
+
+replicaCount: 1
+
+image: "fluid_platform"
+
+resources: 
+  limits:
+    cpu: 400m
+    # memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 200Mi
+
+celery:
+  enabled: true
+  replicaCount: 1
+  command: "celery -A app  worker --concurrency=2 --loglevel=debug"
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 6Gi
+    requests:
+      cpu: 100m
+      memory: 2Gi
+
+enabledServices: "core_mgmt,api"

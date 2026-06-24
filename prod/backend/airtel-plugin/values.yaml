@@ -1,0 +1,40 @@
+# airtel-plugin - coredge prod
+# copied from ccs-helm-charts
+
+global:
+  UseDailyBuilds: true
+  releaseTag: latest
+
+replicaCount: 1
+
+repository: docker.io/coredgeio
+
+proxy:
+  http_proxy_url: http://appproxy.airtel.com:4145
+  https_proxy_url: http://appproxy.airtel.com:4145
+
+frontendCert: ""
+
+domainName: 0
+
+kafkaBootstrap: kafka-cluster-kafka-bootstrap.kafka:9092
+
+quotaThreshold: 0
+
+serviceNow:
+  url: ""
+  username: ""
+  password: ""
+  group: 0
+  disabled: false
+  groupNamespace: ""
+
+gatewayConfig:
+  isStorageClientBehindGw: false
+  gatewayAddr: ""
+  vpcAddr: ""
+
+ccpConfig:
+  baseUrl: ""
+  cmdbEventsApiPath: ""
+  

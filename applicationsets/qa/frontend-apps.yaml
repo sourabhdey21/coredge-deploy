@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  labels:
+    category: frontend
+    customer: coredge
+    env: qa
+  name: coredge-qa-frontend
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - app: admin-portal
+      #- app: celery-flower
+      - app: user-portal
+      - app: mongo-express
+      - app: pgadmin
+  template:
+    metadata:
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+      labels:
+        category: frontend
+        customer: coredge
+        env: qa
+      name: '{{app}}-coredge-qa'
+      namespace: argocd
+    spec:
+      destination:
+        namespace: coredge-qa
+        server: https://kubernetes.default.svc
+      project: default
+      sources:
+      - ref: values
+        repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+        targetRevision: main
+      - helm:
+          valueFiles:
+          - $values/qa/images.yaml
+          - $values/qa/frontend/{{app}}/values.yaml
+        path: helm/frontend-charts/{{app}}
+        repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+        targetRevision: main
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ServerSideApply=true

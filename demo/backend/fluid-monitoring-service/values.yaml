@@ -1,0 +1,185 @@
+# Default values for fluid-monitoring-service
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global settings
+global:
+  imageRegistry: "coredgeio"
+  imagePullSecrets:
+    - name: docker-registry-key
+  storageClass: ""
+
+# Application settings
+app:
+  name: fluid-monitoring-service
+  version: "1.0.0"
+  replicaCount: 1
+  
+  image:
+    repository: fluid-monitoring-service
+    tag: "latest"
+    pullPolicy: IfNotPresent
+    
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+      
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+    
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+
+# Environment variables
+env:
+  # Application settings
+  APP_NAME: "Fluid Monitoring Service"
+  APP_VERSION: "1.0.0"
+  DEBUG: "false"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  
+  # monitoring
+  MONITORING_DASHBOARD_RESOURCE_TYPE: "compute,block"
+ 
+  # Security
+  SECRET_KEY: "your-secret-key-here-change-in-production"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  
+  # Redis settings
+  REDIS_CACHE_PREFIX: "monitoring-cache"
+  
+# Database URLs - These should be provided via environment variables
+  MONGODB_URL: "mongodb://sigma:pass@compass-configdb:27017"
+  POSTGRES_URL: "postgresql+asyncpg://ccs:ccsdbadmin@ccs-postgresql-cluster:5432/cloud"
+  REDIS_URL: "redis://notification-store:6380"
+  
+  # Provider API Keys - These should be provided via environment variables
+  GRAFANA_API_KEY: ""  # e.g., "your-grafana-api-key"
+  ELASTICSEARCH_API_KEY: ""  # e.g., "your-elasticsearch-api-key"
+
+# Database configurations
+# Note: MongoDB and PostgreSQL URLs should be provided via environment variables
+# MONGODB_URL and POSTGRES_URL respectively
+databases:
+  # MongoDB configuration
+  mongodb:
+    enabled: false  # Disabled by default - use external MongoDB
+    url: ""  # Will be overridden by MONGODB_URL env var
+    database: "monitoring_db"
+    
+  # PostgreSQL configuration  
+  postgresql:
+    enabled: false  # Disabled by default - use external PostgreSQL
+    url: ""  # Will be overridden by POSTGRES_URL env var
+    database: "monitoring_db"
+      
+  # Redis configuration
+  redis:
+    enabled: true  # Can use embedded Redis or external
+    url: "redis://redis:6379"
+    auth:
+      enabled: false
+      password: ""
+
+# External provider configurations - Provider URLs are retrieved from database
+# Only API keys need to be provided via environment variables
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: fluid-monitoring-service.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Service Monitor for Prometheus
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+# Network Policy
+networkPolicy:
+  enabled: false
+  ingress: []
+  egress: []
+
+# Persistence
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 8Gi
+
+# Liveness and Readiness probes
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    
+  readiness:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+    successThreshold: 1
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Health checks
+healthCheck:
+  enabled: true
+  path: "/health"
+  port: 8000

@@ -1,0 +1,75 @@
+mode: distributed
+
+replicas: 3
+
+rootUser: admin
+rootPassword: password123
+
+persistence:
+  enabled: true
+  size: 20Gi
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+service:
+  type: ClusterIP
+  port: 9000
+
+consoleService:
+  type: ClusterIP
+  port: 9001
+
+# MinIO API Ingress
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  path: /
+  hosts:
+    - minio-api.coredge.internal
+  tls:
+    - secretName: coredge-tls
+      hosts:
+        - minio-api.coredge.internal
+
+# MinIO Console Ingress
+consoleIngress:
+  enabled: true
+  ingressClassName: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  path: /
+  hosts:
+    - minio-console.coredge.internal
+  tls:
+    - secretName: coredge-tls
+      hosts:
+        - minio-console.coredge.internal
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - minio
+        topologyKey: "kubernetes.io/hostname"
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9000"

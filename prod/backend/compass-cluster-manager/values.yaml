@@ -1,0 +1,47 @@
+# compass-cluster-manager - coredge prod
+# copied from ccs-helm-charts
+
+replicaCount:
+  clusterManager: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+  UseDailyBuilds: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+    globaldb:
+      host: ""
+
+betaFeatures:
+  enabled: false
+
+clusterManager:
+  enabled: true
+  sandboxImage: pause:3.9
+  hostProvisionerConfig:
+    osImages:
+      - name: ""
+  externalClusterReference:
+    kubeconfigSecretName: ""
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

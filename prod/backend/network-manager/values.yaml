@@ -1,0 +1,87 @@
+# network-manager - coredge prod
+# copied from ccs-helm-charts
+
+global:
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+
+  # Default application type: "ccp"
+  application: "ccp"
+  projectLabel: "" # value could be "Cell" in Airtel otherwise is null
+
+  #Set this to true for environments without internet and update the proxy details
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    no_proxy: "localhost,127.0.0.1,cluster.local,.svc,.svc.cluster.local"
+
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+    
+replicaCount:
+  networkManager: 1
+
+providerinfo:
+  # servicetoken: eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJkaWQiOjY5NDg0MDkxNzI0ODQ0ODU4MTgsImRzbiI6ImRldnRlc3RpbmciLCJkc3QiOiJhY2NvdW50IiwiZXhwIjoxNzUxMjIxODAxLCJpYXQiOjE3NDMwNDkwNTksIm9naSI6Njk0ODQwOTE3MjQ4NDQ3NzIwNywib2duIjoiYXJpdGVsLWFwYWMiLCJzaWQiOiJmMWM5N2M0OTdiZDM1YWZkNGQ5MDgxMjNjNjBiYzNlYjBmNzgzYmMwMmQwOTQ0NDk4YmNjYjU5NjU5NTM4NmQxLXp1U2lZNDZjRllwNElncXlRZTRmelNRQW1fQm00RnhlMF9HNVpncHQifQ.SWQXy0UhVTdKnFqoTP2Q-IA7PjjPKG-5FH0RnCWGHih1qo4VmERDplyK7NWKxltqf2GAziVC4-HC0T4cE44nSg
+  providername: neutron
+  # vnistart: 5000
+  # vniend: 5999
+  # vlanstart: 2
+  # vlanend: 3000
+  customername: privatecloud
+  skipvpccreation: false
+  enablebefe: false
+  # relayip: 192.168.0.12
+  isworkspacestoredisabled: true
+  # isproduction: false
+  # fabricnavid: 2
+  defaultmtu: 9000
+  vpclimit: 10
+  subnetlimit: 20
+  enablecoreswitchconfig: true
+  enablesubnetquota : true
+  enablevpcquota : true
+
+apiEndpoint:
+  compassEndpoint: compass-api:8085
+  adminPlatformEndpoint: admin-platform:5000
+  ccpExtension: ccp-extension:8000
+ 
+resources: 
+  limits:
+    cpu: 3000m
+    memory: 6Gi
+  requests:
+    cpu: 1500m
+    memory: 2Gi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

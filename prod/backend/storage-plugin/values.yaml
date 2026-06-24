@@ -1,0 +1,102 @@
+# storage-plugin - coredge prod
+# copied from ccs-helm-charts
+
+global:
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+replicaCount:
+  storagePlugin: 1
+
+ddn:
+  enabled: false
+
+gatewayConfig:
+  #if storage plugin is beind gateway , set it to true
+  isStorageClientBehindGw: false
+
+# storageProvider:
+#   fileStorage:
+#     id: fs-1
+#       # Ceph configuration required by storage-plugin to use ceph
+      # as a storage provider. 
+      # endpoint is address and username,passwd are credentials
+      # of machine hosting ceph.
+      # nfsProto is config required for nfs protocol, where 
+      # nfsClusterId is required to manage nfs export path on buckets.
+      # rgw: endpoint,userId, accessKey and secretKey is required to
+      # manage buckets on ceph. 
+      # ceph:
+      #   endpoint: <ceph rest api endpoint (http://x.x.x.x)>
+      #   username: <ceph rest api username>
+      #   passwd: <ceph rest api password>
+      #   nfsProto:
+      #     nfsClusterId: <ceph nfs ganesha cluster id>
+      #   rgw:
+      #     endpoint: <ceph rgw endpoint>
+      #     userId: <ceph rgw user id >
+      #     accessKey: <ceph rgw access key>
+      #     secretKey: <ceph rgw secret key>
+      # dell:
+      #   endpoint: <dell endpoint address>
+      #   username: <dell username>
+      #   passwd: <dell password>
+      #   poolId: <dell storage pool id>
+      #   nasServerId: <dell nas server id on which file storage will be configured>
+      # ontap:
+      #   mgmtEndpoint: <ontap management endpoint address (http://x.x.x.x:yyyy)>
+      #   dataEndpoint: <ontap data endpoint address (x.x.x.x)>
+      #   username: <ontap username>
+      #   passwd: <ontap password>
+      #   svnName: <ontap storage virtual machine name>
+      #   svmUuid: <ontap nas storage virtual machine uuid>
+
+replicationTagMapping:
+  #[regioncode_azcode] : Env Name
+  in-chn-dev-01_az-1: IN-CHN-DEV-01
+  #[regioncode_az1code_az2code] : Env Name
+  in-chn-dev-01_az-1_az-2: IN-CHN-DEV-01
+  #in-chn-dev-az-az-1: IN-CHN-DEV-01
+replicationTypeMapping:
+  az: Cross-AZ-Replication
+  local: local
+  region: Cross-Region-Replication
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

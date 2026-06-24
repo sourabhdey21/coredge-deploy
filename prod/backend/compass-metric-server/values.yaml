@@ -1,0 +1,56 @@
+# compass-metric-server - coredge prod
+# copied from ccs-helm-charts
+
+replicaCount:
+  compassMetricServer: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+  UseDailyBuilds: false
+
+  geolocation:
+    host: ""
+    port: ""
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+clusterManager:
+  enabled: true
+
+trivy:
+  enabled: false
+  defaultServer:
+    hostName: ""
+    port: "4954"
+    scheme: "https"
+    allowInsecure: false
+    customHeaders: []
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

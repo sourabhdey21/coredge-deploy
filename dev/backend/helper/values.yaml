@@ -1,0 +1,6 @@
+# helper - core42 dev
+# copied from ccs-helm-charts
+
+global:
+  releaseTag: latest
+  UseDailyBuilds: true

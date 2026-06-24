@@ -1,0 +1,15 @@
+# Prod overrides for `coredge-monitoring/helm/promtail` chart.
+# Defaults live in `coredge-monitoring/helm/promtail/values.yaml`.
+
+fullnameOverride: promtail
+
+daemonset:
+  enabled: true
+
+resources: {}
+
+image:
+  registry: docker.io
+  repository: coredgeio/promtail
+  tag: "2.9.3"
+  pullPolicy: IfNotPresent

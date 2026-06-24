@@ -1,0 +1,65 @@
+global:
+  vmauth:
+    enabled: true
+  victoriametrics:
+    enabled: true
+  victoriaLogs:
+    enabled: true
+
+# vmauth — deploys a VMAuth CRD instance
+# The victoria-metrics-operator (from victoriaoperator chart) must be running first.
+#
+# VMAuth is the single entry-point proxy for the monitoring stack.
+# Routing order matters — more specific paths MUST come before broader ones.
+# e.g. /insert/loki/.* before /insert/.* to correctly split VictoriaLogs vs VMCluster traffic.
+
+enabled: true
+
+# fullnameOverride sets the VMAuth resource name.
+# Operator creates service: vmauth-<name>
+fullnameOverride: "vmauth"
+
+nodePort: 30427
+
+spec:
+  replicaCount: 1
+  image:
+    repository: docker.io/coredgeio/vmauth
+    tag: "v1.138.0"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  unauthorizedUserAccessSpec:
+    url_map:
+      # Rule 1: VictoriaLogs log ingestion (Loki-compat) — MUST be before /insert/.*
+      - src_paths:
+          - "/insert/loki/.*"
+        url_prefix:
+          - "http://vlinsert:9481"
+      # Rule 2: VictoriaMetrics metrics write (vminsert)
+      - src_paths:
+          - "/insert/.*"
+        url_prefix:
+          - "http://vminsert-victoriametrics:8480"
+      # Rule 3: VictoriaLogs log query (LogsQL) — MUST be before /select/.*
+      - src_paths:
+          - "/select/logsql/.*"
+        url_prefix:
+          - "http://vlselect:9471"
+      # Rule 4: VictoriaMetrics metrics query (PromQL via vmselect)
+      - src_paths:
+          - "/select/.*"
+        url_prefix:
+          - "http://vmselect-victoriametrics:8481"
+      # Rule 5: VMAgent UI — targets page and API
+      - src_paths:
+          - "/targets"
+          - "/targets/.*"
+          - "/api/v1/targets"
+        url_prefix:
+          - "http://vmagent-vmagent:8429"

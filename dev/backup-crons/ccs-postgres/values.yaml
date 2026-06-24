@@ -1,0 +1,21 @@
+cronjob:
+  name: ccp-postgres-backup
+  schedule: "0 * * * *"
+
+pvc:
+  name: ccp-postgres-backup-pvc
+  size: 50Gi
+
+postgres:
+
+  image: postgres:16.3
+
+  secretName: ccs-postgres-config
+
+
+s3:
+  enabled: false
+  secretName: s3-credentials
+
+retainCount: 15
+localRetentionDays: 1

@@ -1,0 +1,143 @@
+# compass-api - coredge prod
+# copied from ccs-helm-charts
+
+replicaCount:
+  compassConfig: 1
+
+global:
+  repository: coredgeio
+  releaseTag: latest
+  imagePullPolicy: Always
+
+  dnsEnabled: true
+  environment: ""
+
+  # used by api-config configmap (host agent/controller URL fallback)
+  externalIP: "127.0.0.1"
+
+  # used by api-config configmap
+  rootRealm: "cloud"
+
+  proxy:
+    enabled: false
+    http_proxy: ""
+
+  tenantManagement:
+    enabled: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+  frontend:
+    userPortal:
+      domain: "console.coredge.io"
+      nodePort: "32500"
+      tlsSecret: "coredgeio-tls"
+
+  kubectl:
+    tokenAccess:
+      enabled: true
+
+  kubeApi:
+    tokenAccess:
+      enabled: true
+
+  controller:
+    mtls:
+      disabled: false
+
+  geolocation:
+    host: ""
+    port: ""
+
+  grafana:
+    enabled: false
+
+  saas:
+    enabled: false
+
+  proxyProtocol:
+    enabled: false
+
+  defaultRepos:
+    enabled: true
+
+  marketPlace:
+    url: ""
+
+  slurmCluster:
+    env: ""
+
+betaFeatures:
+  enabled: false
+
+cluster:
+  accessLogs:
+    enabled: true
+  limits:
+    accesslogs:
+      maxSize: 50000
+      maxEntries: 5000
+
+controller:
+  externalIP: "127.0.0.1"
+
+  username: admin
+  password: Orbiter@123
+  firstname: ""
+  lastname: ""
+  email: ""
+
+  agent:
+    image: ""
+    imageRepo: ""
+    hostNetwork: false
+
+  prometheus:
+    endpoint: ""
+
+  orbiterauthurl: "http://orbiter-auth:8080"
+
+auth-service:
+  limits:
+    events:
+      maxSize: 50000
+      maxEntries: 5000
+    accesslogs:
+      maxSize: 50000
+      maxEntries: 5000
+
+trivy:
+  enabled: false
+  defaultServer:
+    hostName: ""
+    port: "4954"
+    scheme: "https"
+    allowInsecure: false
+    customHeaders: []
+
+resources: 
+  limits:
+    cpu: 3000m
+    memory: 4Gi
+  requests:
+    cpu: 1500m
+    memory: 2Gi
+
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

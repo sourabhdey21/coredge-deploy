@@ -1,0 +1,40 @@
+# baremetal-manager - coredge demo
+# copied from ccs-helm-charts
+
+global:
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+
+maas:
+  url: ""
+  apikey: ""
+  
+replicaCount:
+  baremetalManager: 1
+
+fabric:
+  enabled: false
+  virtualIPs:
+    first: ""
+    last: ""

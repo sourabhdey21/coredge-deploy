@@ -1,0 +1,10 @@
+# sockets-server - core42 dev
+# copied from ccs-helm-charts
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+
+sockets:
+  replicaCount: 1

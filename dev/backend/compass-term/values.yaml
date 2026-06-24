@@ -1,0 +1,33 @@
+# compass-term - core42 dev
+# copied from ccs-helm-charts
+
+replicaCount:
+  compassTerminal: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+
+  dnsEnabled: false
+
+  frontend:
+    userPortal:
+      domain: ""
+      nodePort: "32500"
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+controller:
+  externalIP: "127.0.0.1"

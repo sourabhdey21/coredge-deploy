@@ -1,0 +1,25 @@
+backups:
+  - name: config
+    schedule: "0 1/6 * * *"
+    mongoHost: "compass-configdb"
+    pvcName: config-mongodb-backup-pvc
+    s3Path: compass-configdb
+
+  - name: metrics
+    schedule: "0 1/6 * * *"
+    mongoHost: "compass-metricsdb"
+    pvcName: metric-mongodb-backup-pvc
+    s3Path: compass-metricsdb
+
+mongo:
+  secretName: configdb-secret
+
+s3:
+  enabled: false
+  secretName: s3-credentials
+  retainCount: 15
+
+persistence:
+  size: 50Gi
+
+localRetentionDays: 1

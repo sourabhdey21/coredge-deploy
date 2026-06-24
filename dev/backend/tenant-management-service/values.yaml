@@ -1,0 +1,90 @@
+# tenant-management-service - core42 dev
+# copied from ccs-helm-charts
+
+global:
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+  #Set this to true for environments without internet and update the proxy details
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    no_proxy: "localhost,127.0.0.1,cluster.local,.svc,.svc.cluster.local"
+
+replicaCount:
+  tenantManagementService: 1
+
+client:
+  name: "core42"
+
+externalServiceCmdbEventsConfig:
+  url: ""
+  token: ""
+  #needs to be set to true if we need to send cmdb events , make sure to set url and token when cmdbEventsEnabled is set to true
+  cmdbEventsEnabled: true
+
+cmdb:
+  enabled: false
+
+pollingTime: 60  # in seconds
+
+redisdb:
+  host: "compass-redis"     
+  port: "6379"
+  pass: ""                  
+  tlsEnabled: false
+
+email:
+  enabled: false
+  templateId: 2001
+
+tenantMetadata:
+  enabled: true
+  stopUpdateOnceSet: true
+  endpointDetails:
+    baseUrl: "https://api.dev.cloud42.ai/user/v1/admin/tenants"
+    httpMethod: "GET"
+    defaultHeaders:
+      apikey: "7Z4lXwekKnKNIO4VCFznjqgMs3lj91MT"
+
+tenantUserMetadata:
+  enabled: false
+  stopUpdateOnceSet: true
+  endpointDetails:
+    baseUrl: "https://api.dev.cloud42.ai/user/v1/admin/tenants"
+    httpMethod: "GET"
+    defaultHeaders:
+      apikey: "7Z4lXwekKnKNIO4VCFznjqgMs3lj91MT"
+
+publishMeteringInfo:
+  enabled: false
+  endpointDetails:
+    baseUrl: "https://api.dev.cloud42.ai/billing/v1/webhook/instance/events"
+    httpMethod: "POST"
+    defaultHeaders:
+      contentType: "application/json"
+

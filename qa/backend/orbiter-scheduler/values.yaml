@@ -1,0 +1,112 @@
+global:
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+  # repository from where the images are pulled
+  repository: &repository coredgeio
+  releaseTag: &releaseTag latest
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+images:
+  orbiter-scheduler:
+    repository: ""  # Falls back to global.repository
+    image: orbiter-scheduler
+    tag: ""  # Falls back to global.releaseTag
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  httpPort: 8080
+  grpcPort: 8090
+  nodePort:
+    http: 32650
+    grpc: 32651
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 500Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# HPA Configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+podAnnotations: {}
+
+serviceAccount:
+  name: orbiter-scheduler
+  create: true
+  annotations: {}
+
+# Application configuration
+config:
+  server:
+    grpcPort: ":8090"
+    httpPort: ":8080"
+
+  scheduler:
+    workerCount: 10
+    defaultTimeout: 30
+    executionHistoryDays: 30
+
+  httpClient:
+    timeout: 30
+    maxIdleConns: 100
+    idleConnTimeout: 90
+    insecureSkipVerify: false
+
+  default:
+    timezone: "UTC"
+    
+  features:
+    enableInitScript: true    
+
+# Health probes
+livenessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+serviceRegistry:
+  enabled: false

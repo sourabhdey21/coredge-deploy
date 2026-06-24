@@ -1,0 +1,50 @@
+replicaCount:
+  compassController: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+
+  environment: ""
+  dnsEnabled: true
+
+  externalIP: "console-dev.coredge.internal"
+
+  frontend:
+    userPortal:
+      domain: "console-dev.coredge.internal"
+      nodePort: "32501"
+
+  proxyProtocol:
+    enabled: false
+
+  controller:
+    mtls:
+      disabled: true
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+      metricsdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+resources: 
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 2Gi      
+
+controller:
+  externalIP: "127.0.0.1"
+  proxyIPs:
+    - "127.0.0.1"
+    - "::1"

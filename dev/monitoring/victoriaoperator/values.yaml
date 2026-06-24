@@ -1,0 +1,114 @@
+global:
+  clusterLabel: cluster
+defaultDashboards:
+  annotations:
+    k8s-sidecar-target-directory: "/tmp/dashboards/ckp component monitoring"
+  # vmcluster and vmagent are deployed as separate charts — override condition so dashboards still render
+  dashboards:
+    victoriametrics-cluster:
+      enabled: true
+    victoriametrics-vmagent:
+      enabled: true
+    victoriametrics-vmalert:
+      enabled: true
+    victoriametrics-operator:
+      enabled: true
+    node-exporter-full:
+      enabled: true
+# -------------------------
+# Operator
+# -------------------------
+victoria-metrics-operator:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "victoria-metrics-operator"
+  serviceMonitor:
+    enabled: true
+  operator:
+    disable_prometheus_converter: false
+  configReloader:
+    image:
+      repository: docker.io/coredgeio/victoria-metrics-operator
+      tag: config-reloader-v0.67.0
+      pullPolicy: IfNotPresent
+  crds:
+    plain: true
+    cleanup:
+      # enabled: true = helm runs a pre-delete hook job that deletes all VM CRD instances
+      # before the operator pod terminates — prevents VMCluster/VMAgent stuck in Terminating
+      enabled: true
+    upgrade:
+      enabled: false
+  image:
+    repository: docker.io/coredgeio/victoria-metrics-operator
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  admissionWebhooks:
+    enabled: false
+# VMSingle/VMCluster/VMAgent/VMAlert/VMAlertmanager are managed by separate charts.
+# Disable them here to prevent the victoria-operator chart from creating duplicate instances.
+vmsingle:
+  enabled: false   # VMCluster is used instead (victoriametrics/ chart)
+vmcluster:
+  enabled: false   # managed by victoriametrics/ chart
+vmagent:
+  enabled: false   # managed by vmagent/ chart
+vmalert:
+  enabled: false   # standalone vmalert/ chart is used instead
+alertmanager:
+  enabled: false   # managed by vmalert/ chart (HA StatefulSet)
+# grafana/KSM/NodeExporter are parent-level charts, not sub-charts of victoria-operator.
+# Disable their vmScrapes here to avoid nil .Subcharts pointer errors.
+# VMServiceScrapes for KSM and NodeExporter are created via monitoring-stack/templates/ instead.
+grafana:
+  enabled: false
+  vmScrape:
+    enabled: false
+kube-state-metrics:
+  enabled: false
+  vmScrape:
+    enabled: false
+prometheus-node-exporter:
+  enabled: false
+  vmScrape:
+    enabled: false
+# -------------------------
+# Kube component TLS scrape configs
+# -------------------------
+kubeEtcd:
+  vmScrape:
+    spec:
+      endpoints:
+        - port: http-metrics
+          scheme: https
+          tlsConfig:
+            caFile: /etc/vm/etcd-certs/ca.crt
+            certFile: /etc/vm/etcd-certs/healthcheck-client.crt
+            keyFile: /etc/vm/etcd-certs/healthcheck-client.key
+            insecureSkipVerify: true
+kubeControllerManager:
+  vmScrape:
+    spec:
+      endpoints:
+        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          port: http-metrics
+          scheme: https
+          tlsConfig:
+            caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            insecureSkipVerify: true
+kubeScheduler:
+  vmScrape:
+    spec:
+      endpoints:
+        - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+          port: http-metrics
+          scheme: https
+          tlsConfig:
+            caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            insecureSkipVerify: true

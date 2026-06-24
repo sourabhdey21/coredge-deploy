@@ -1,0 +1,6 @@
+# helper - coredge demo
+# copied from ccs-helm-charts
+
+global:
+  releaseTag: latest
+  UseDailyBuilds: true

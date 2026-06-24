@@ -1,0 +1,59 @@
+# orbiter-ticketing-service - airtel dev
+# copied from ccs-helm-charts
+
+global:
+  smtp:
+    enabled: true      
+    senderEmail: "noreply@DFlare.com"
+    senderName: "DFlare Admin"      
+    smtpHost: "smtp.dummy.com"
+    smtpPort: 25
+    authRequired: true       
+    username: "username"     
+    password: "password"
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+kafka:
+  brokers: 
+    - kafka-ui.airtel-dev.svc.cluster.local:80
+  topic:
+    jiraEventTopic: ""
+    jiraWebhookInboundTopic: ""
+    notificationTopic: ""
+
+events:
+  limits:
+    maxSize: null
+    maxEntries: null
+
+s3:
+  accessKey: ""
+  secretKey: ""
+  endpoint: ""
+
+jira:
+  projects:
+    - projectKey: ""
+      customFields:
+        project: ""
+        tenant: ""
+        domain: ""
+        subCategory: ""
+        resource: ""
+        category: ""
+  webhookSecret: ""
+
+
+category:
+  Compute: []
+  Network: []
+  Storage: []
+  Others: []
+
+email:
+  enabled: null
+
+

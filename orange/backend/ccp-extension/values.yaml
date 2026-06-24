@@ -1,0 +1,95 @@
+# ccp-extension - airtel dev
+# copied from ccs-helm-charts
+
+global:
+  # storage class to use for persistent volumes, if empty fallback to
+  # default storage class
+  storageClass: &storageclass ""
+
+  # repository from where the controller images are pulled for
+  # controller
+  repository: &repository coredgeio
+
+  # image pull policy to be used
+  imagePullPolicy: &imagePolicy Always
+
+  # this field is considered only when UseDailyBuilds is set to be false
+  # provides configuration of build tag to be used for container images
+  releaseTag: &releaseTag latest
+
+  #Set this to true for environments without internet and update the proxy details
+  proxy:
+    enabled: false
+    http_proxy: ""
+    https_proxy: ""
+    no_proxy: "localhost,127.0.0.1,cluster.local,.svc,.svc.cluster.local"
+
+
+  ## Override for PostgresDB architecture
+  ## global.postgresql.architecture.standalone Set to 'false' deploys a postgresql as a cluster with High Availability
+  ## global.postgresql.architecture.standalone Set to 'true' deploys postgresql in standalone mode with no High Availability
+  postgresql:
+    architecture:
+      standalone: false
+    ### Config overrride to use external Postgres
+    ### This will not deploy postgresql with ccp
+    external:
+      host: ""
+      port: ""
+      user: ""
+      database: ""
+      password: ""
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+      metricsdb:
+        host: ""
+        port: ""
+        user: ""
+        pass: ""
+    globaldb:
+      host: ""
+      port: ""
+      user: ""
+      pass: ""
+
+replicaCount: 1
+
+image: "ccp-extension"
+
+nodeSelector: {}
+
+app:
+  csg_flavor_name: "nw.Large"
+  fsg_flavor_name: "nw.Med"
+  fortigate_image_name: "fortios.qcow2"
+
+logger:
+  enabled: false
+
+f5:
+  enabled: false
+snow:
+  enabled: false 
+
+primary_region:
+  enabled: true
+
+default_network_type: ""
+
+service_vpc_auto_peering:
+  enabled: true
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 6Gi
+  requests:
+    cpu: 100m
+    memory: 2Gi

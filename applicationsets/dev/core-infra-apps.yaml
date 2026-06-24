@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: coredge-dev-core-infra
+  namespace: argocd
+  labels:
+    customer: coredge
+    env: dev
+    category: core-infra
+spec: 
+  generators:
+    - list:
+        elements:
+          - app: mongodb
+          - app: openfga
+          - app: postgres
+          - app: redis
+          - app: keycloak-ha
+          - app: kafka
+          - app: repository-cred
+          - app: minio
+  template: 
+    metadata: 
+      name: '{{app}}-coredge-dev'
+      namespace: argocd
+      labels:
+        customer: coredge
+        env: dev
+        category: core-infra
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: coredge-dev
+      # values repo first so it shows in argocd UI
+      sources:
+        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+          targetRevision: main
+          ref: values
+        - repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+          targetRevision: keycloak-health
+          path: helm/core-infra-charts/{{app}}
+          helm:
+            valueFiles:
+              - $values/dev/images.yaml
+              - $values/dev/core-infra/{{app}}/values.yaml
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

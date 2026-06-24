@@ -1,0 +1,25 @@
+global:
+  repository: &repository coredgeio
+  releaseTag: &releaseTag latest
+  imagePullPolicy: &imagePolicy Always
+  storageClassName: ""
+
+replicaCount: 1
+
+image: 'ccp-tcpwave-plugin'
+
+app:
+  orbiter_metering_base_uri: "http://orbiter-metering:8081"
+  orbiter_event_enabled: "true"
+  mongo_db_name: "ccp_dns_management"
+  compass_api_url: "http://compass-api:8085"
+
+  mongoUrlOverride: "mongodb://sigma:pass@compass-configdb:27017"
+
+  resources: 
+    limits:
+      cpu: 500m
+      # memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 200Mi

@@ -1,0 +1,19 @@
+# service-registry - core42 dev
+
+global:
+  repository: &repository coredgeio
+  releaseTag: &releaseTag latest
+  imagePullPolicy: &imagePolicy Always
+  dnsEnabled: &dnsEnabled false
+  ingressClass: &ingressClass ""
+  externalIP: &controllerIP 127.0.0.1
+
+replicaCount: 1
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

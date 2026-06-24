@@ -1,0 +1,30 @@
+# pgadmin - coredge prod
+# copied from ccs-helm-charts
+
+global:
+  repository: &repository coredgeio
+  imagePullPolicy: &imagePolicy Always
+  imagePullSecrets: []
+
+image: 'adminer:4.8.1'
+
+service:
+  type: NodePort
+
+replicaCount: 1
+resources: 
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+# HPA Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

@@ -1,0 +1,70 @@
+global:
+  victoriametrics:
+    enabled: true
+  vmauth:
+    enabled: true
+  vmagent:
+    enabled: true
+
+# victoriametrics — deploys a VMCluster CRD instance
+# The victoria-metrics-operator (from victoriaoperator chart) must be running first.
+#
+# Generated services by operator (based on metadata.name = fullnameOverride below):
+#   vmselect-victoriametrics:8481  (query endpoint)
+#   vminsert-victoriametrics:8480  (write endpoint)
+#   vmstorage-victoriametrics:8482 (storage endpoint)
+
+enabled: true
+
+# Operator creates services: vmselect-<name>, vminsert-<name>, vmstorage-<name>
+fullnameOverride: "victoriametrics"
+
+spec:
+  retentionPeriod: "30d"
+  vminsert:
+    replicaCount: 1
+    image:
+      repository: docker.io/coredgeio/vminsert
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  vmselect:
+    replicaCount: 2
+    image:
+      repository: docker.io/coredgeio/vmselect
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+  vmstorage:
+    replicaCount: 2
+    image:
+      repository: docker.io/coredgeio/vmstorage
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 2Gi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+
+nodePortInsert: 30480
+nodePortSelect: 30481

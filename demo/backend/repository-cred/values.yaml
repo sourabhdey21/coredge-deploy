@@ -1,0 +1,8 @@
+# repository-cred - coredge demo
+# copied from ccs-helm-charts
+
+repository: docker.io
+repositoryCred:
+  user: kubedrona
+  password: b0d2dd30-cca5-48ee-aa01-45a94fdc8751
+  mail: info@coredge.io

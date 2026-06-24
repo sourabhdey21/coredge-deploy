@@ -1,0 +1,154 @@
+# openfga - airtel dev
+# copied from ccs-helm-charts
+
+global:
+  repository: &repository coredgeio
+  imagePullPolicy: &imagePolicy Always
+  imagePullSecrets: []
+  storageClass: &storageclass ""
+
+image: 'openfga:v1.11'
+
+replicaCount: 3
+
+service:
+  type: NodePort
+
+resources: 
+  limits:
+    cpu: 3
+    memory: 6Gi
+  requests:
+    cpu: 500m
+    memory: 500Mi
+
+nodeSelector: {}
+
+extraEnv:
+  # 3 DB connections per pod forces OpenFGA to queue concurrent writes internally.
+  # With synchronous_commit=off each write completes in <5ms. 20 concurrent auth
+  # writes drain in ~35ms (7 batches × 3 conns × 5ms) — well within the 15s deadline.
+  # At cpu:1 with 20 connections, Postgres serialized writes for 15-22s each; at 3
+  # connections the queue drains fast with no lock contention.
+  - name: OPENFGA_DATASTORE_MAX_OPEN_CONNS
+    value: "3"
+  - name: OPENFGA_DATASTORE_MAX_IDLE_CONNS
+    value: "3"
+  # 120s > Go SDK's 90s idle timeout — prevents server-closed-idle-connection errors.
+  - name: OPENFGA_DATASTORE_CONN_MAX_IDLE_TIME
+    value: "120s"
+
+playground:
+  enabled: true
+  port: 3000
+
+metrics: 
+  enabled: true 
+  port: 2112 
+
+authn:
+  method:
+  preshared:
+    keys: "MYPreSharedToken1"      
+
+postgresqlOverride:
+  enabled: false
+  host: ""
+  port: ""
+  user: ""
+  pass: ""
+  db: ""
+
+## Postgresql Configuration
+postgresql:
+  args:
+    - "-c"
+    - "max_connections=300"
+    - "-c"
+    - "shared_buffers=512MB"
+    - "-c"
+    - "wal_buffers=32MB"
+    - "-c"
+    - "checkpoint_completion_target=0.9"
+    # synchronous_commit=off: commits return without waiting for WAL fsync to disk.
+    # Safe here because OpenFGA tuple data is rebuilt from MongoDB on auth restart —
+    # losing a few tuples on a Postgres crash is acceptable and they'll be rewritten.
+    # This is the key fix: eliminates the ~10ms+ fsync wait on every single write,
+    # which under 20 concurrent writers was serializing to 20 seconds total.
+    - "-c"
+    - "synchronous_commit=off"
+  enabled: true
+  auth:
+    postgresPassword: password
+    database: postgres
+  image: postgres:15.7
+  service:
+    type: ClusterIP
+  resources:
+    limits:
+      # 4 CPUs: allows Postgres to process 20 concurrent OpenFGA writes without
+      # CFS throttling. At cpu:1 each write took 12-17s causing deadline_exceeded.
+      memory: 4Gi
+      cpu: 4
+    requests:
+      memory: 1Gi
+      cpu: 2
+  persistence:
+    size: 2Gi
+    accessModes:
+      - ReadWriteOnce
+  
+migrate:
+  extraVolumes: []
+  extraVolumeMounts: []
+  extraInitContainers: []
+  sidecars: []
+  annotations:
+    helm.sh/hook: "post-install,post-upgrade,post-rollback,post-delete"
+    helm.sh/hook-weight: "-5"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "0"      
+  labels: {}
+  timeout:
+
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook: PreSync      
+  name: ""
+
+
+datastore:
+  metrics:
+    enabled: false
+  engine: postgres
+  uri: "postgres://postgres:password@openfga-postgresql:5432/postgres?sslmode=disable"    
+  uriSecret:
+  username:
+  password:
+  existingSecret:
+  secretKeys:
+    uriKey:
+    usernameKey:
+    passwordKey:
+  maxCacheSize:
+  maxOpenConns:
+  maxIdleConns:
+  connMaxIdleTime:
+  connMaxLifetime:
+  applyMigrations: true
+  waitForMigrations: true
+  migrationType: job
+  migrations:
+    resources: {}
+    image:
+      repository: groundnuty/k8s-wait-for
+      pullPolicy: Always
+      tag: "v2.0"
+

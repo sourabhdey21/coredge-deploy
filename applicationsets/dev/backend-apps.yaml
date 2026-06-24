@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: coredge-dev-backend
+  namespace: argocd
+  labels:
+    customer: coredge
+    env: dev
+    category: backend
+spec: 
+  generators:
+    - list:
+        elements:
+        - app: admin-platform-celery
+        - app: admin-platform
+        - app: coredge-plugin
+        - app: compute-service
+        - app: auth-service
+        - app: orbiter-scheduler
+        - app: autoscaling
+        - app: backup-service
+        - app: baremetal-manager
+        - app: ccp-extension
+        - app: cloud-manager
+        - app: compass-api
+        - app: compass-cluster-manager
+        - app: compass-controller
+        - app: compass-image-scanner
+        - app: compass-metric-server
+        - app: compass-orchestrator
+        - app: compass-term
+        - app: container-registry
+        - app: core-mgmt-service
+        - app: helper
+        - app: kg-cluster-notifier
+        - app: metering
+        - app: network-manager
+        - app: neutron-service
+        - app: orbiter-ticketing-service
+        - app: sockets-server
+        - app: storage-plugin
+        - app: tenant-management-service
+        - app: vmconsole
+        - app: volume-service
+        - app: workflow-manager
+        - app: gpu-paas-user
+        - app: gpu-paas-comm
+        - app: compass-multicloud-manager
+        - app: compass-multicloud-migration
+        - app: service-registry
+        - app: orbiter-compute-console-service
+        - app: fluid-monitoring-service
+        - app: dbaas-k8s
+        - app: f5-orchestrator
+        - app: orbiter-compute-service
+  template: 
+    metadata: 
+      name: '{{app}}-coredge-dev'
+      namespace: argocd
+      labels:
+        customer: coredge
+        env: dev
+        category: backend
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: coredge-dev
+      # values repo first so it shows in argocd UI
+      sources:
+        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+          targetRevision: main
+          ref: values
+        - repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+          targetRevision: main
+          path: helm/backend-charts/{{app}}
+          helm:
+            valueFiles:
+              - $values/dev/backend/{{app}}/values.yaml
+              - $values/dev/images.yaml
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

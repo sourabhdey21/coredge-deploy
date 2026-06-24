@@ -1,0 +1,81 @@
+global:
+  vmalert:
+    enabled: false
+  vmauth:
+    enabled: true
+
+replicaCount: 1
+
+image:
+  repository: docker.io/coredgeio/vmalert
+  tag: v1.122.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8880
+  nodePort: 30223
+
+args:
+  datasource: "http://vmauth-vmauth:8427/select/0/prometheus"
+  notifier: "http://alertmanager:9093"
+  evaluationInterval: "1m"
+  remoteWrite: "http://vmauth-vmauth:8427/insert/0/prometheus"
+
+alerts:
+  NIC:
+    enabled: false
+  ckp:
+    enabled: true
+
+alertmanager:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: docker.io/coredgeio/alertmanager
+    tag: v0.27.0
+
+  service:
+    type: NodePort
+    port: 9093
+    nodePort: 30093
+
+  persistence:
+    size: 5Gi
+
+  # Group by labels — use "..." to group by all labels (one alert per unique label set)
+  # groupBy:
+  #   - "..."
+  groupBy:
+    - "alertname"
+    - "cluster"
+    - "namespace"
+    - "severity"
+    #- "pod"
+
+  # Alertmanager timing
+  groupWait: "30s"
+  groupInterval: "10m"
+  repeatInterval: "1h"
+  webhookRepeatInterval: "30m"
+  emailRepeatInterval: "20m"
+
+  # Secret name where webhook URLs are stored
+  webhookSecretName: "alertmanager-webhook-secret"
+  # Add multiple webhook URLs — chart creates the secret automatically
+  teamsWebhookUrls:
+    - "https://default6fc131bd72da4e55bb855e873ab21d.c6.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/87decd50115d4e30b984109327ce6186/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NGMB1_hcyK5NnPTf4fO2GJJ4dKFp7WTMfw7Wb96Nlk8"
+  # Used only when teamsWebhookUrls is empty and secret is created manually
+  # Set this to the number of webhook-N keys in your manually created secret
+  webhookCount: 0
+
+  ## this is exmaple use yours
+  smtp:
+    enabled: false
+    smarthost: "smtp.gmail.com:587"
+    from: "amitesh.singh@coredge.io"
+    to: "amitesh.singh@coredge.io"
+    authUsername: "amiteshhsingh@gmail.com" 
+    authPassword: "qhjj llll dekn mrnp"
+    requireTLS: true

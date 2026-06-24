@@ -1,0 +1,280 @@
+# Image tags for coredge prod
+# Update tags here, not in individual values files
+global:
+  repository: registry.coredge.io/cdc/coredgeio
+  releaseTag: ccs-1.12.0-rc1
+  imagePullPolicy: Always
+
+images:
+  # core-infra
+  mongodb:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: mongodb
+    tag: 5.0.3
+  openfga:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: openfga
+    tag: v1.11
+  postgres:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: postgres
+    tag: 15
+  redis:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: redis
+    tag: 6.2.5
+  keycloak-ha:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: keycloak
+    tag: v26.6.0-fluid-v1
+
+  # frontend
+  admin-portal:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid-admin
+    tag: fluid-2.1.0-rc55
+  celery-flower:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: celery-flower
+    tag: ccs-1.12.0-rc1
+  user-portal:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid-console
+    tag: fluid-2.1.0-rc55
+  mongo-express:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: mongo-express
+    tag: 1.0.2-18
+
+  pgadmin:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: adminer
+    tag: 4.8.1
+
+  # backend
+  admin-platform-celery:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_admin_platform
+    tag: fluid-2.1.0-rc12
+  admin-platform:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_admin_platform
+    tag: fluid-2.1.0-rc12
+  airtel-plugin:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-airtel-plugin
+    tag: daily-2026-04-14
+
+  archival-storage:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.0.0
+  auth-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-auth
+    tag: fluid-2.1.0-rc21
+  autoscaling:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.1.0-rc12  # was: fluid-2.1.0-rc5
+
+  backup-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.1.0-rc12
+  baremetal-manager:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: airtel-baremetal-manager
+    tag: fluid-2.1.0-rc4
+
+  ccp-extension:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: ccp-extension
+    tag: fluid-2.1.0-rc15
+  certificates-manager:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.1.0-rc12
+
+  cloud-manager:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-cloud-manager
+    tag: fluid-2.1.0-rc1
+  compass-init:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-init
+    tag: ccs-1.12.0-rc1
+
+  compass-api:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-api
+    tag: fluid-2.1.0-rc6
+  compass-multicloud-manager:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-multicloud-manager
+    tag: dev-0204-1
+  compass-cluster-manager:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-cluster-manager
+    tag: fluid-2.1.0-rc5
+  compass-controller:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-controller
+    tag: ccs-1.14.0
+
+  compass-image-scanner:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-image-scanner
+    tag: ccs-1.12.0-rc1
+  compass-metric-server:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-metric-server
+    tag: ccs-1.12.0-rc1
+
+  compass-orchestrator:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-orchestrator
+    tag: ccs-1.12.0-rc1
+
+  compass-term:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: compass-term
+    tag: ccs-1.12.0-rc1
+
+  compute-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.1.0-rc12
+
+  container-registry:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-registry
+    tag: fluid-2.1.0-rc3
+
+  core-mgmt-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.1.0-rc12
+
+  helper:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: helper
+    tag: ccs-1.12.0-rc1
+  kg-cluster-notifier:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: kg-cluster-notifier
+    tag: ccs-1.12.0-rc1
+
+  metering:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-metering
+    tag: fluid-2.1.0-rc13
+
+  network-manager:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-network-manager
+    tag: fluid-2.1.0-rc4
+
+  neutron-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.1.0-rc12
+
+  notification-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: notification-service
+    tag: ccs-1.12.0-rc1
+  orbiter-ticketing-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-ticketing-service
+    tag: fluid-2.1.0-rc5
+  orbiter-scheduler:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-scheduler
+    tag: 2026-04-20
+  repository-cred:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: repository-cred
+    tag: ccs-1.12.0-rc1
+  sockets-server:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_socket
+    tag: fluid-2.1.0-rc3  # was: fluid-2.0.0-rc3
+
+  storage-plugin:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: orbiter-storage-plugin
+    tag: fluid-2.1.0-rc19
+
+  tenant-management-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: tenant-management-service
+    tag: fluid-2.1.0-rc5
+  vmconsole:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: nginx
+    tag: 1.28.0
+
+  volume-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid_platform
+    tag: fluid-2.1.0-rc12
+
+  workflow-manager:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: workflow-manager
+    tag: fluid-2.1.0-rc1
+
+  dbaas-k8s:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: dbaas-k8s
+    tag: fluid-2.1.0-rc7
+
+  gpu-paas-user:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: gpu-paas-user
+    tag: fluid-2.1.0-rc7
+
+  gpu-paas-comm:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: gpu-paas-comm
+    tag: fluid-2.1.0-rc3
+
+  fluid-monitoring-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: fluid-monitoring-service
+    tag: fluid-2.1.0-rc10
+
+  ccp-tcpwave-plugin:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: ccp-tcpwave-plugin
+    tag: fluid-2.0.0-rc2
+  ccp-security-plugin:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: ccp-security-plugin
+    tag: fluid-2.1.0-rc5
+  service-registry:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: service-reg-be
+    tag: latest
+  service-registry-fe:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: service-reg
+    tag: dev-2026-04-07
+  orbiter-compute-console-service:
+    repository: registry.coredge.io/cdc/coredgeio
+    image: pam-service
+    tag: latest
+  f5-orchestrator:
+    repository: coredgeio
+    image: f5_orchestrator
+    tag: fluid-2.1.0-rc0
+
+
+serviceRegistry:
+  enabled: true
+  # sidecarImage: "docker.io/coredgeio/service-reg-sidecar:new-1"
+  sidecarImage: "akashsharma2401/sidecar:cm-0"
+  endpoint: "http://service-registry:8080"
+  grpcUrl: "service-registry:8090"
+  servicePort: "8080"

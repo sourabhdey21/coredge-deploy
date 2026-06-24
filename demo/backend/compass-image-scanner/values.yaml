@@ -1,0 +1,33 @@
+# compass-image-scanner - coredge demo
+# copied from ccs-helm-charts
+
+replicaCount:
+  compassImageScanner: 1
+
+global:
+  repository: coredgeio
+  imagePullPolicy: Always
+  releaseTag: latest
+  UseDailyBuilds: false
+
+  mongodb:
+    external:
+      enabled: false
+      configdb:
+        host: ""
+        port: ""
+    globaldb:
+      host: ""
+      port: ""
+
+clusterManager:
+  enabled: true
+
+trivy:
+  enabled: true
+  defaultServer:
+    hostName: ""
+    port: "4954"
+    scheme: "https"
+    allowInsecure: false
+    customHeaders: []
