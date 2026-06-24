@@ -33,10 +33,10 @@ spec:
         namespace: orange-dev
       # values repo first so it shows in argocd UI
       sources:
-        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+        - repoURL: https://github.com/sourabhdey21/coredge-deploy.git
           targetRevision: main
           ref: values
-        - repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+        - repoURL: https://github.com/sourabhdey21/ccs-helm-charts.git
           targetRevision: main
           path: helm/core-infra-charts/{{app}}
           helm:

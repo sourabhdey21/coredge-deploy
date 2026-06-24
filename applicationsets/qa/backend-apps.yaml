@@ -67,14 +67,14 @@ spec:
       project: default
       sources:
       - ref: values
-        repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+        repoURL: https://github.com/sourabhdey21/coredge-deploy.git
         targetRevision: main
       - helm:
           valueFiles:
           - $values/qa/images.yaml
           - $values/qa/backend/{{app}}/values.yaml
         path: helm/backend-charts/{{app}}
-        repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+        repoURL: https://github.com/sourabhdey21/ccs-helm-charts.git
         targetRevision: main
       syncPolicy:
         automated:

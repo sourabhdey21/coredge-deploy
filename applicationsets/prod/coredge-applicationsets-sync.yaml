@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+    repoURL: https://github.com/sourabhdey21/coredge-deploy.git
     path: applicationsets/prod
     targetRevision: main
   destination:

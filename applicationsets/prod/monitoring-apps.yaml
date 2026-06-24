@@ -61,7 +61,7 @@ spec:
         namespace: monitoring
       # values repo listed first so it appears in ArgoCD UI
       sources:
-        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+        - repoURL: https://github.com/sourabhdey21/coredge-deploy.git
           targetRevision: main
           ref: values
         - repoURL: https://github.com/coredgeio/coredge-monitoring.git

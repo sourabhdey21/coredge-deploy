@@ -33,11 +33,11 @@ spec:
         namespace: coredge-dev
       sources:
         # 1) values repo
-        - repoURL: https://github.com/coredgeio/coredge-deploy-repo.git
+        - repoURL: https://github.com/sourabhdey21/coredge-deploy.git
           targetRevision: main
           ref: values
         # 2) helm charts repo
-        - repoURL: https://github.com/coredgeio/ccs-helm-charts.git
+        - repoURL: https://github.com/sourabhdey21/ccs-helm-charts.git
           targetRevision: main
           path: helm/backup-crons/{{app}}
           helm:

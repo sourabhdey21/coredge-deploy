@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: coredge-app-of-app-qa
+  name: fluid-app-of-apps
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/sourabhdey21/coredge-deploy.git
-    path: applicationsets/qa
-    targetRevision: main
+    targetRevision: master        # Branch for your target environment
+    path: applicationsets/dev   # Change to: applicationsets/qa, /prod, or /demo
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
