@@ -58,10 +58,10 @@ spec:
       # values repo first so it shows in argocd UI
       sources:
         - repoURL: https://github.com/sourabhdey21/coredge-deploy.git
-          targetRevision: main
+          targetRevision: master
           ref: values
         - repoURL: https://github.com/sourabhdey21/ccs-helm-charts.git
-          targetRevision: main
+          targetRevision: master
           path: helm/backend-charts/{{app}}
           helm:
             valueFiles:

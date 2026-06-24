@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/sourabhdey21/coredge-deploy.git
     path: applicationsets/qa
-    targetRevision: main
+    targetRevision: master
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

@@ -62,10 +62,10 @@ spec:
       # values repo listed first so it appears in ArgoCD UI
       sources:
         - repoURL: https://github.com/sourabhdey21/coredge-deploy.git
-          targetRevision: main
+          targetRevision: master
           ref: values
         - repoURL: https://github.com/sourabhdey21/coredge-monitoring.git
-          targetRevision: main
+          targetRevision: master
           path: helm/{{app}}
           helm:
             releaseName: '{{app}}'

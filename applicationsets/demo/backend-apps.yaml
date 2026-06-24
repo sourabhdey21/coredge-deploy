@@ -66,14 +66,14 @@ spec:
       sources:
       - ref: values
         repoURL: https://github.com/sourabhdey21/coredge-deploy.git
-        targetRevision: main
+        targetRevision: master
       - helm:
           valueFiles:
           - $values/demo/images.yaml
           - $values/demo/backend/{{app}}/values.yaml
         path: helm/backend-charts/{{app}}
         repoURL: https://github.com/sourabhdey21/ccs-helm-charts.git
-        targetRevision: main
+        targetRevision: master
       syncPolicy:
         automated:
           prune: true

@@ -34,11 +34,11 @@ spec:
       sources:
         # 1) values repo
         - repoURL: https://github.com/sourabhdey21/coredge-deploy.git
-          targetRevision: main
+          targetRevision: master
           ref: values
         # 2) helm charts repo
         - repoURL: https://github.com/sourabhdey21/ccs-helm-charts.git
-          targetRevision: main
+          targetRevision: master
           path: helm/backup-crons/{{app}}
           helm:
             valueFiles:
