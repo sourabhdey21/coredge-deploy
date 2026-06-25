@@ -25,12 +25,12 @@ mongodb:
   configdb:
     enabled: true
     usersSecretName: configdb-secrets
-    # replicaCount: 3
+    # replicaCount: 1
 
   metricsdb:
     enabled: true
     usersSecretName: metricsdb-secrets
-    # replicaCount: 3
+    # replicaCount: 1
 
   systemUsers:
     backup:        { user: "backup",        password: "CHANGE_ME" }

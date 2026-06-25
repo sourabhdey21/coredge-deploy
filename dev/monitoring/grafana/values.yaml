@@ -106,11 +106,11 @@ ingress:
 
 resources:
   limits:
-      cpu: 2
-      memory: 4Gi
-  requests:
       cpu: 500m
-      memory: 1Gi
+      memory: 512Mi
+  requests:
+      cpu: 50m
+      memory: 128Mi
 
 persistence:
   type: pvc

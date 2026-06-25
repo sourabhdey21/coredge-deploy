@@ -80,6 +80,7 @@ spec:
             valueFiles:
               - $values/dev/backend/{{app}}/values.yaml
               - $values/dev/images.yaml
+              - $values/dev/dev-small-cluster.yaml
       syncPolicy:
         automated:
           prune: true

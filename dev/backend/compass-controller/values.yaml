@@ -37,11 +37,11 @@ global:
 
 resources: 
   limits:
-    cpu: 2000m
-    memory: 4Gi
-  requests:
     cpu: 500m
-    memory: 2Gi      
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 256Mi      
 
 controller:
   externalIP: "127.0.0.1"

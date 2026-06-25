@@ -91,11 +91,11 @@ external_network:
 
 resources:
   limits:
-    cpu: 1000m
-    memory: 6Gi
+    cpu: 100m
+    memory: 512Mi
   requests:
     cpu: 100m
-    memory: 2Gi
+    memory: 256Mi
 
 # Provider cluster configuration (ConfigMap: ccp-provider-cluster-config)
 # All keys are optional; missing keys are simply omitted from the ConfigMap.

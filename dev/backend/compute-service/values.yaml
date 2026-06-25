@@ -67,8 +67,8 @@ celery:
   command: "celery -A app  worker --concurrency=2 --loglevel=debug -Q q_compute"
   resources: 
     limits:
-      cpu: 1000m
-      memory: 6Gi
+      cpu: 100m
+      memory: 512Mi
     requests:
       cpu: 100m
-      memory: 2Gi
+      memory: 256Mi

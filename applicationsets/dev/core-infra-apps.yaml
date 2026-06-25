@@ -40,12 +40,13 @@ spec:
           targetRevision: master
           ref: values
         - repoURL: https://github.com/sourabhdey21/ccs-helm-charts.git
-          targetRevision: keycloak-health
+          targetRevision: master
           path: helm/core-infra-charts/{{app}}
           helm:
             valueFiles:
               - $values/dev/images.yaml
               - $values/dev/core-infra/{{app}}/values.yaml
+              - $values/dev/dev-small-cluster.yaml
       syncPolicy:
         automated:
           prune: true

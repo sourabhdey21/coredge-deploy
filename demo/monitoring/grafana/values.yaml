@@ -244,7 +244,7 @@ postgresql:
     image: docker.io/coredgeio/spilo-16:3.2-p3
     pgVersion: '15'
     maxconnections: "300"
-    replicaCount: '3'
+    replicaCount: '1'
     loadBalancer:
       master: false
       replica: false

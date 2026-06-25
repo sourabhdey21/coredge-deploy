@@ -176,9 +176,9 @@ adminPlatform:
       --prefetch-multiplier=1
     resources: 
       limits:
-        cpu: 1000m
+        cpu: 100m
         memory: 8Gi    
       requests:
         cpu: 100m
-        memory: 4Gi    
+        memory: 512Mi    
   

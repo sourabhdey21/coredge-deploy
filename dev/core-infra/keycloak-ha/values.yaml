@@ -13,9 +13,8 @@ global:
   imagePullSecrets: []
   storageClass: &storageClass ""
 
-## Keycloak replica count.
-## Minimum is set to 3 to provide HA capabilities
-replicaCount: 3
+## Keycloak replica count (single node for dev small cluster)
+replicaCount: 1
 
 ## Keycloak Image and Tag
 image:
@@ -53,11 +52,11 @@ themeOverride:
 ## 16Gi RAM: gives JVM 12g heap for Infinispan — entire KC dataset fits in cache.
 resources:
   requests:
-    cpu: "6"
-    memory: "16Gi"
+    cpu: 250m
+    memory: 1Gi
   limits:
-    cpu: "6"
-    memory: "16Gi"
+    cpu: "1"
+    memory: 2Gi
 
 ## Name of the secret containing the Keycloak custom CA certificates. The secret will be mounted as a directory and configured using KC_TRUSTSTORE_PATHS.
 ## https://www.keycloak.org/server/keycloak-truststore

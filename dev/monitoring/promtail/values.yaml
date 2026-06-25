@@ -6,7 +6,13 @@ fullnameOverride: promtail
 daemonset:
   enabled: true
 
-resources: {}
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
 
 image:
   registry: docker.io

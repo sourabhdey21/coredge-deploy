@@ -6,11 +6,11 @@ replicaCount:
 
 resources:
   limits:
-    cpu: "3"
-    memory: 4Gi
+    cpu: 500m
+    memory: 1Gi
   requests:
-    cpu: 1500m
-    memory: 2Gi
+    cpu: 100m
+    memory: 256Mi
 
 global:
   repository: coredgeio

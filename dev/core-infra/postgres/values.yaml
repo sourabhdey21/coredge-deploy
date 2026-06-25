@@ -15,7 +15,7 @@ global:
 
   postgresql:
     architecture:
-      standalone: false
+      standalone: true
     ### Config override to use external Postgres
     ### This will not deploy postgresql with ccp
     external:
@@ -48,7 +48,7 @@ postgresqlHA:
     pass: 'ccsdbadmin'
   ## No. of postgres cluster nodes.
   ## Minimum 3 for HA. Must be Odd number
-  replicaCount: '3'
+  replicaCount: '1'
   ## Postgres LoadBalancer override
   loadBalancer:
     master: false

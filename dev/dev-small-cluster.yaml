@@ -1,0 +1,23 @@
+# Dev small-cluster resource overrides (3 worker nodes × 4 CPU / 8 GiB).
+# Appended last in ApplicationSet valueFiles so it wins over per-app defaults.
+
+global:
+  imagePullSecrets:
+    - name: docker-registry-key
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+celery:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi

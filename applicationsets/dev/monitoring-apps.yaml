@@ -72,6 +72,7 @@ spec:
             valueFiles:
               - $values/dev/images.yaml
               - $values/dev/monitoring/{{app}}/values.yaml
+              - $values/dev/dev-small-cluster.yaml
       # Prevent ArgoCD from fighting over immutable PVC fields on StatefulSets
       ignoreDifferences:
         - group: apps

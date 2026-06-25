@@ -50,7 +50,7 @@ postgresqlHA:
     pass: 'ccsdbadmin'
   ## No. of postgres cluster nodes. 
   ## Minimum 3 for HA. Must be Odd number
-  replicaCount: '3'
+  replicaCount: '1'
   ## Postgres LoadBalancer override
   loadBalancer:
     master: false

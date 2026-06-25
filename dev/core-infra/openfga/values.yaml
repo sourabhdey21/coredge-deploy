@@ -9,18 +9,18 @@ global:
 
 image: 'openfga:v1.11'
 
-replicaCount: 3
+replicaCount: 1
 
 service:
   type: NodePort
 
 resources: 
   limits:
-    cpu: 3
-    memory: 6Gi
-  requests:
     cpu: 500m
-    memory: 500Mi
+    memory: 1Gi
+  requests:
+    cpu: 50m
+    memory: 256Mi
 
 nodeSelector: {}
 
@@ -86,13 +86,11 @@ postgresql:
     type: ClusterIP
   resources:
     limits:
-      # 4 CPUs: allows Postgres to process 20 concurrent OpenFGA writes without
-      # CFS throttling. At cpu:1 each write took 12-17s causing deadline_exceeded.
-      memory: 4Gi
-      cpu: 4
-    requests:
       memory: 1Gi
-      cpu: 2
+      cpu: 500m
+    requests:
+      memory: 256Mi
+      cpu: 100m
   persistence:
     size: 2Gi
     accessModes:
