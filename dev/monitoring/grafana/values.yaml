@@ -259,6 +259,8 @@ postgresql:
       limits:
         cpu: 500m
         memory: 500Mi
-    pg_hba: []
+    pg_hba:
+      - host all all 0.0.0.0/0 md5
+      - host all all ::/0 md5
     monitoring:
       enabled: false

@@ -40,13 +40,9 @@ spec:
     - name: etcd-certs
       mountPath: /etc/vm/etcd-certs
       readOnly: true
-  # Schedule VMAgent on master nodes where etcd certs exist
-  nodeSelector:
-    node-role.kubernetes.io/control-plane: ""
-  tolerations:
-    - key: "node-role.kubernetes.io/control-plane"
-      operator: "Exists"
-      effect: "NoSchedule"
+  # Schedule VMAgent on any node (dev cluster has no control-plane node labels)
+  nodeSelector: {}
+  tolerations: []
   replicaCount: 1
   statefulMode: true
   statefulStorage:

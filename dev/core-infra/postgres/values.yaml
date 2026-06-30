@@ -15,7 +15,7 @@ global:
 
   postgresql:
     architecture:
-      standalone: true
+      standalone: false
     ### Config override to use external Postgres
     ### This will not deploy postgresql with ccp
     external:
@@ -124,7 +124,7 @@ pgcluster:
   postgresVersion: 15
   ## No. of postgres cluster nodes.
   ## Minimum 3 for HA. Must be Odd number
-  replica: "3"
+  replica: "1"
   ## Postgres LoadBalancer override
   loadBalancer:
     master: false
@@ -146,14 +146,10 @@ pgcluster:
     ## 25% of 32Gi pod RAM. Entire KC dataset (500 realms, 7k clients, roles) fits many times over.
     ## With all hot data in shared_buffers, 500 concurrent cold-cache queries become memory reads,
     ## not disk reads — query time drops from 10-30s to <100ms, well under any transaction timeout.
-    sharedBuffers: "8GB"
-    ## Tells the query planner that 24GB of memory is available for caching (shared_buffers + OS cache).
-    ## Planner prefers index scans over sequential scans — critical for KC's point-lookup patterns.
-    effectiveCacheSize: "24GB"
-    ## Per-operation sort/hash memory. Speeds up the multi-table JOINs KC uses for role resolution.
-    workMem: "32MB"
-    ## Allow PG to parallelize large queries across 4 workers on the 15-CPU pod.
-    maxParallelWorkersPerGather: "4"
+    sharedBuffers: "128MB"
+    effectiveCacheSize: "512MB"
+    workMem: "4MB"
+    maxParallelWorkersPerGather: "2"
     ## No per-statement logging — was the biggest disk I/O multiplier under load.
     ## Slow-query logging (log_min_duration_statement) is still active at the Patroni level.
     logStatement: "none"
@@ -165,7 +161,7 @@ pgcluster:
   connectionPooler:
     enabled: true
     ## 7 PgBouncer instances for 1500-realm burst (was 5); 2000/7 = ~285 real PG connections/instance
-    instances: "7"
+    instances: "1"
     ## session mode: each KC JDBC connection maps to a dedicated PG backend for its lifetime.
     ## Required because KC/Hibernate keeps transactions open across multiple statements (idle in
     ## transaction). Transaction mode returns connections to the pool mid-transaction, causing
@@ -180,17 +176,12 @@ pgcluster:
   ## requests=limits for Guaranteed QoS — avoids OOM eviction during query bursts.
   resources:
     requests:
-      cpu: "15"
-      memory: "32Gi"
+      cpu: 250m
+      memory: 512Mi
     limits:
-      cpu: "15"
-      memory: "32Gi"
-  ## Tolerations for PostgreSQL pods — matches the dedicated=postgres:NoSchedule taint on DB nodes
-  tolerations:
-    - key: "dedicated"
-      operator: "Equal"
-      value: "infra"
-      effect: "NoSchedule"
+      cpu: "1"
+      memory: 1Gi
+  tolerations: []
   ## Postgres pg_hba configuration override
   pg_hba: []
     # - hostssl all             all          0.0.0.0/0                md5
