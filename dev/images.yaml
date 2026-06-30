@@ -206,7 +206,7 @@ images:
   workflow-manager:
     repository: registry.coredge.io/cdc/coredgeio
     image: workflow-manager
-    tag: ccs-1.12.0-rc1
+    tag: fluid-2.1.0-rc1
   dbaas-k8s:
     repository: registry.coredge.io/cdc/coredgeio
     image: dbaas-k8s
